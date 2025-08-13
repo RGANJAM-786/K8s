@@ -6,7 +6,7 @@ The Control Plane acts as the brain of the cluster, managing and scheduling work
 
 The etcd stores all cluster metadata and configuration in key-value pairs, acting as the cluster’s database. 
 
-The kube-scheduler decides on which node a workload (pod) should run based on resource availability,
+The kube-scheduler decides on which node a pod should run based on resource availability,
 
 The kube-controller-manager supervises and ensures that the cluster’s desired state matches the current state, automatically handling failures and recreations of pods or nodes when necessary. 
 

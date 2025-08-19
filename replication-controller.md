@@ -16,37 +16,3 @@ Even if you set the replica count to 1, it guarantees that at least one Pod of y
 
 
 
-apiVersion: v1
-kind: ReplicationController
-metadata:
-  name: webreplication
-  namespace: uat
-spec:
-  replicas: 3
-  selector:
-    app: web-app-replication
-  template:
-    metadata:
-      name: web-app-pod
-      labels:
-        app: web-app-replication
-    spec:
-      containers:
-      - name: replicacontainer
-        image: rganjam/springapp:latest
-        ports:
-        - containerPort: 8080
-
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: replica-service
-  namespace: uat
-spec:
-  type: NodePort
-  selector:
-    app: web-app-replication
-  ports:
-  - port: 80
-    targetPort: 8080

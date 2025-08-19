@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: node-exporter
+  labels:
+    app: node-exporter
+spec:
+  selector:
+    matchLabels:
+      app: node-exporter
+  template:
+    metadata:
+      labels:
+        app: node-exporter
+    spec:
+      containers:
+      - name: node-exporter
+        image: prom/node-exporter:latest
+        ports:
+        - containerPort: 9100
+
+
+
+4️⃣ How It Works in Real-Time
+
+After applying this DaemonSet, Kubernetes starts one Node Exporter Pod per node.
+
+Each Pod runs an agent that exposes system metrics on port 9100.
+
+Prometheus (the central monitoring system) scrapes all these Pods → collects CPU, memory, and disk usage metrics for every node.
+
+5️⃣ Why DaemonSet is the Right Choice
+
+Deployment → might place all Pods on only a few nodes → not guaranteed per-node coverage.
+
+DaemonSet → guarantees one Pod per node → perfect for monitoring, logging, and networking agents.
+
+📝 Example Interview Answer
+
+“Let’s say I want to monitor the health of every Kubernetes node.
+If I run Node Exporter as a Deployment, Kubernetes might schedule Pods on only 2–3 nodes, leaving the rest unmonitored.
+Instead, I use a DaemonSet, which guarantees that one Node Exporter Pod runs on each node. 
+This way, no matter how many nodes I have, every node has exactly one monitoring agent. Prometheus then scrapes these Pods to get full cluster metrics.

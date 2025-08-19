@@ -17,15 +17,22 @@ ReplicationController was the first way in Kubernetes to ensure Pods are always 
 
 
 ✅ ReplicaSet:
+
 “A ReplicaSet in Kubernetes makes sure the desired number of Pods are always running, similar to ReplicationController. The key difference is that ReplicaSet supports set-based label selectors, which makes it more flexible. For example, I can tell it to manage Pods with labels app in (frontend, backend). In modern Kubernetes, we usually don’t create ReplicaSets directly — instead, Deployments manage ReplicaSets for us and add features like rolling updates and rollbacks.”
 
 
 ✅ Deployment in Kubernetes:
+
 A Deployment is the standard way to run and manage applications in Kubernetes. It manages ReplicaSets, which in turn manage Pods. The advantage of a Deployment is that it supports rolling updates, rollbacks, and scaling. For example, if I want to update my app to a new version, the Deployment gradually replaces old Pods with new ones to avoid downtime. If something fails, it can rollback automatically. That’s why Deployments are widely used in production instead of using ReplicaSets directly.”
 
 
  ✅DaemonSet
+ 
 DaemonSet in Kubernetes ensures that one copy of a Pod runs on every node in the cluster. It’s used for system-level services like log collectors, monitoring agents, or networking components that need to run everywhere. For example, if I deploy a DaemonSet with a monitoring agent, it will automatically start one agent Pod on every node, and if a new node joins the cluster, the DaemonSet creates a Pod there too. This is different from Deployments, which focus on running a desired number of replicas across nodes, not necessarily one per node.”
+
+✅Example Interview Answer
+
+“Let’s say I want to monitor the health of every Kubernetes node. If I run Node Exporter as a Deployment, Kubernetes might schedule Pods on only 2–3 nodes, leaving the rest unmonitored. Instead, I use a DaemonSet, which guarantees that one Node Exporter Pod runs on each node. This way, no matter how many nodes I have, every node has exactly one monitoring agent. Prometheus then scrapes these Pods to get full cluster metrics.”
 
 
 

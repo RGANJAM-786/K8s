@@ -23,7 +23,12 @@ ReplicationController was the first way in Kubernetes to ensure Pods are always 
 
 ✅ Deployment in Kubernetes:
 
-A Deployment is the standard way to run and manage applications in Kubernetes. It manages ReplicaSets, which in turn manage Pods. The advantage of a Deployment is that it supports rolling updates, rollbacks, and scaling. For example, if I want to update my app to a new version, the Deployment gradually replaces old Pods with new ones to avoid downtime. If something fails, it can rollback automatically. That’s why Deployments are widely used in production instead of using ReplicaSets directly.”
+A Deployment is the standard way to run and manage applications in Kubernetes. It manages ReplicaSets, which in turn manage Pods. The advantage of a Deployment is that it supports rolling updates, rollbacks, and scaling. For example, if I want to update my app to a new version, the Deployment gradually replaces old Pods with new ones to avoid downtime. If something fails, it can rollback automatically. That’s why Deployments are widely used in production instead of using ReplicaSets 
+directly.”
+
+❓ Why use Deployment when we already have ReplicaSet?
+
+“ReplicaSet ensures Pods are always running, but it doesn’t support rolling updates or rollbacks. Deployment builds on top of ReplicaSet and adds these advanced features. In production, we always use Deployments instead of directly using ReplicaSets, because Deployments provide version control, gradual rollouts, rollbacks, and easier management of application lifecycle. ReplicaSet is mostly used internally by Deployments.”
 
 
  ✅DaemonSet
@@ -34,6 +39,9 @@ DaemonSet in Kubernetes ensures that one copy of a Pod runs on every node in the
 
 “Let’s say I want to monitor the health of every Kubernetes node. If I run Node Exporter as a Deployment, Kubernetes might schedule Pods on only 2–3 nodes, leaving the rest unmonitored. Instead, I use a DaemonSet, which guarantees that one Node Exporter Pod runs on each node. This way, no matter how many nodes I have, every node has exactly one monitoring agent. Prometheus then scrapes these Pods to get full cluster metrics.”
 
+❓ Why use DaemonSet when we already have ReplicaSet / ReplicationController / Pod?
+
+“A ReplicaSet or RC only ensures a number of Pods are running, but it doesn’t control where they run. If I set replicas=5, all Pods could still end up on the same node. A DaemonSet is designed for node-level workloads — it guarantees one Pod runs on every node in the cluster. That’s why DaemonSets are used for things like monitoring agents, log collectors, or network plugins, where you need one agent per node. ReplicaSet/RC are for scaling applications, DaemonSet is for per-node system services.”
 
 
 

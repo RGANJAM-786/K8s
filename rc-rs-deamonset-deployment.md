@@ -30,12 +30,102 @@ directly.”
 
 “ReplicaSet ensures Pods are always running, but it doesn’t support rolling updates or rollbacks. Deployment builds on top of ReplicaSet and adds these advanced features. In production, we always use Deployments instead of directly using ReplicaSets, because Deployments provide version control, gradual rollouts, rollbacks, and easier management of application lifecycle. ReplicaSet is mostly used internally by Deployments.”
 
+
 🚀 Types of Kubernetes Deployments
+1️⃣ Recreate Deployment
 
-“Kubernetes supports different deployment strategies. The simplest is Recreate, where all old Pods are killed and new ones created, but this causes downtime. The default is RollingUpdate, which gradually replaces Pods with no downtime. On top of that, we can implement advanced strategies like Blue-Green, where we maintain two environments and switch traffic instantly, and Canary deployments, where a small percentage of traffic is routed to the new version before full rollout. In production, RollingUpdate is most common, while Blue-Green and Canary are used when we want safer releases or instant rollbacks.”
+How it works: K8s deletes all old Pods first, then creates new ones.
+
+Downtime: Yes (because there’s a gap between old Pods shutting down and new Pods starting).
+
+When to use:
+
+When downtime is acceptable.
+
+When your app cannot handle multiple versions running at the same time.
+
+Example:
+
+strategy:
+  type: Recreate
 
 
+⚠️ Drawback → Your app will be offline during rollout.
 
+2️⃣ Rolling Update (Default)
+
+How it works: K8s gradually replaces old Pods with new Pods (e.g., one by one).
+
+Downtime: No (if configured properly).
+
+When to use:
+
+Most production apps.
+
+When zero downtime is required.
+
+Example:
+
+strategy:
+  type: RollingUpdate
+  rollingUpdate:
+    maxSurge: 1       # Extra pods allowed above desired replicas
+    maxUnavailable: 1 # How many old pods can be taken down at a time
+
+
+✅ Safest and most common strategy.
+
+3️⃣ Blue-Green Deployment (not native, but can be implemented with Services + Deployments)
+
+How it works:
+
+Two environments run: Blue (current) and Green (new).
+
+Traffic is switched from Blue → Green once Green is ready.
+
+Downtime: No.
+
+Rollback: Instant (just switch back traffic).
+
+When to use:
+
+Critical apps where rollback must be instant.
+
+You want a staging-like environment before releasing.
+
+Example:
+
+Blue = deployment-v1
+
+Green = deployment-v2
+
+Service points to either one.
+
+4️⃣ Canary Deployment
+
+How it works: Gradually release new version to a small subset of users (e.g., 5% traffic) → monitor → then increase rollout.
+
+Downtime: No.
+
+Rollback: Easy (just remove canary).
+
+When to use:
+
+When you want to test new features safely.
+
+Useful for A/B testing.
+
+Example:
+
+deployment-v1 (90% replicas)
+
+deployment-v2 (10% replicas)
+
+Service load balances across both.
+
+📝 Interview-Friendly Answer
+
+“Kubernetes supports different deployment strategies. The simplest is Recreate, where all old Pods are killed and new ones created, but this causes downtime. The default is RollingUpdate, which gradually replaces Pods with no downtime. On top of that, we can implement advanced strategies like Blue-Green, where we maintain two environments and switch traffic instantly, and Canary deployments, where a small percentage of traffic is routed to the new version before full rollout. In production, RollingUpdate is most common, while Blue-Green and Canary are used when we want safer releases or instant rollbacks.
 
 
  ✅DaemonSet

@@ -30,6 +30,13 @@ directly.”
 
 “ReplicaSet ensures Pods are always running, but it doesn’t support rolling updates or rollbacks. Deployment builds on top of ReplicaSet and adds these advanced features. In production, we always use Deployments instead of directly using ReplicaSets, because Deployments provide version control, gradual rollouts, rollbacks, and easier management of application lifecycle. ReplicaSet is mostly used internally by Deployments.”
 
+🚀 Types of Kubernetes Deployments
+
+“Kubernetes supports different deployment strategies. The simplest is Recreate, where all old Pods are killed and new ones created, but this causes downtime. The default is RollingUpdate, which gradually replaces Pods with no downtime. On top of that, we can implement advanced strategies like Blue-Green, where we maintain two environments and switch traffic instantly, and Canary deployments, where a small percentage of traffic is routed to the new version before full rollout. In production, RollingUpdate is most common, while Blue-Green and Canary are used when we want safer releases or instant rollbacks.”
+
+
+
+
 
  ✅DaemonSet
  

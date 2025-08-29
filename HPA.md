@@ -38,6 +38,13 @@ For example, I can set an HPA to keep CPU at 80%. If traffic spikes, it adds Pod
 ✅
 “HPA is not defined inside a Deployment YAML. Instead, it is created as a separate YAML object (kind: HorizontalPodAutoscaler) where we reference the Deployment (or ReplicaSet) in scaleTargetRef. That’s how Kubernetes knows which workload to scale.”
 
+scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: hpadeployment
+  minReplicas: 2
+  maxReplicas: 4
+
 🔹 Scenario 1: minReplicas = 0
 
 Q: If you configure an HPA with minReplicas: 0, what happens?

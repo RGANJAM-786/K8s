@@ -33,6 +33,8 @@ This saves costs and ensures performance.
 
 “HPA in Kubernetes automatically adjusts the number of Pods in a Deployment or ReplicaSet based on metrics like CPU, memory, or custom metrics.
 For example, I can set an HPA to keep CPU at 80%. If traffic spikes, it adds Pods; if load decreases, it reduces Pods. This ensures efficiency and cost savings.”
+
+
 ✅
 “HPA is not defined inside a Deployment YAML. Instead, it is created as a separate YAML object (kind: HorizontalPodAutoscaler) where we reference the Deployment (or ReplicaSet) in scaleTargetRef. That’s how Kubernetes knows which workload to scale.”
 

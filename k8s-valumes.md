@@ -118,8 +118,10 @@ Great 👍 Let’s prepare some ready-made interview answers for you.
 
 ❓ Q: What is the difference between PV and PVC in Kubernetes?
 
-✅ Answer (Simple & Clear):
-“PV (PersistentVolume) is the actual storage resource in Kubernetes that represents external storage like NFS, AWS EBS, or Azure Disk. PVC (PersistentVolumeClaim) is a request made by a user or application for storage. In short, PV is the supply, PVC is the demand. Once a PVC matches a PV, the Pod can use the PVC to mount storage.”
+
+✅“PV (PersistentVolume) is the actual storage resource in Kubernetes that represents external storage like NFS, AWS EBS, or Azure Disk.
+
+✅PVC (PersistentVolumeClaim) is a request made by a user or application for storage. In short, PV is the supply, PVC is the demand. Once a PVC matches a PV, the Pod can use the PVC to mount storage.”
 
 ❓ Q: Why do we need PVC when we already have PV?
 

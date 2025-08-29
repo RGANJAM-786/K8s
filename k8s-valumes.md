@@ -1,6 +1,6 @@
 ➡️hostPath volumes
 
-"hostPath volumes directly use the node’s filesystem, which makes them non-portable, insecure, and tied to specific nodes. If the Pod moves to another node, the data won’t be there. That’s why we prefer PersistentVolumes & PersistentVolumeclaims with network-backed storage (like EBS, NFS, Ceph, etc.)."
+"hostPath volumes directly use the node’s filesystem, and tied to specific nodes. If the Pod moves to another node, the data won’t be there. That’s why we prefer PersistentVolumes & PersistentVolumeclaims with network-backed storage (like EBS, NFS, Ceph, etc.)."
 
  Let’s take a real-time Jenkins example because Jenkins is a common DevOps tool and interviewers love it.
 

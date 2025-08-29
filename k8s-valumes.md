@@ -123,15 +123,48 @@ Great 👍 Let’s prepare some ready-made interview answers for you.
 
 ✅PVC (PersistentVolumeClaim) is a request made by a user or application for storage. In short, PV is the supply, PVC is the demand. Once a PVC matches a PV, the Pod can use the PVC to mount storage.”
 
-❓ Q: Why do we need PVC when we already have PV?
-
-✅ Answer:
-“We use PVC because developers shouldn’t worry about the details of the storage system. PVs are usually created and managed by cluster admins, while PVCs allow developers to just request storage based on size and access needs. This separation of responsibility makes Kubernetes storage portable and easier to manage.”
-
 ❓ Q: Can you explain with an example how PV, PVC, and Pod work together?
 
 ✅ Answer:
 “Let’s say I have an NFS server with 10GB of space. I create a PV in Kubernetes that represents that NFS share. Now, my application needs 2GB of storage, so I create a PVC asking for 2GB. Kubernetes matches the PVC with the PV and binds them. Finally, in my Pod spec, I mount the PVC. This way, my Pod gets persistent storage, and even if the Pod is deleted or rescheduled, the data is still safe in the NFS backend.”
+
+PVC finds a PV based on storage class, access modes, size, and optional labels.
+
+🔎 What happens if no matching PV is found for a PVC?
+
+PVC stays in "Pending" state
+
+When you create a PVC, Kubernetes tries to find a PV that matches it.
+
+If it doesn’t find one, the PVC is created but remains in Pending status.
+
+👉 “When a PVC is created, Kubernetes tries to match it with an existing PV based on size, access mode, and storage class. If no matching PV is available, the PVC will stay in Pending. If a StorageClass is defined, Kubernetes can dynamically provision a new PV automatically; otherwise, an admin must create a PV manually.”
+
+
+❓ Why do we need PVC when we already have PV?
+
+Think of it like this:
+
+PV (PersistentVolume) = A storage resource created by the Kubernetes admin.
+Example: A 100GB disk from AWS EBS or a shared folder from NFS.
+
+PVC (PersistentVolumeClaim) = A request for storage made by the developer/application.
+Example: “I need 5GB of storage to save my app data.”
+
+👉 Without PVC:
+
+Developers would need to know all the details of the storage (NFS path, AWS disk ID, etc.) when every time they create a Pod.
+
+This is difficult and unsafe, because developers may not have access to cloud/storage infra.
+
+👉 With PVC:
+
+The cluster admin sets up PVs (storage supply).
+
+Developers simply create PVCs (storage requests) without worrying about where the actual disk is.
+
+Kubernetes automatically matches PVC with PV (like connecting demand to supply).
+
 
 ❓ Q: How would you explain this with a real-world analogy?
 

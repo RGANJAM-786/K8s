@@ -53,3 +53,65 @@ Example: Bad syntax in YAML (wrong imagePullPolicy, invalid field name, etc.).
 
 📌 Interview-style answer:
 “In Kubernetes, a Pod shows CreateContainerConfigError when it fails to prepare the container’s configuration. This often happens when a referenced ConfigMap, Secret, or volume is missing, or when the Pod spec has an invalid configuration. For example, if I mount a ConfigMap that doesn’t exist, the Pod will stay in CreateContainerConfigError until I fix it.”
+
+
+:
+
+🔹 ConfigMap Scenarios
+
+Scenario:
+You created a Pod that reads environment variables from a ConfigMap, but the Pod is stuck in CreateContainerConfigError.
+
+Question: How would you troubleshoot this issue?
+
+Expected Answer: Check if the ConfigMap exists in the same namespace, verify the keys inside it match what the Pod spec is referencing, and run kubectl describe pod to see the exact error.
+
+Scenario:
+You updated a ConfigMap that your Deployment is using. But the running Pods didn’t pick up the new values.
+
+Question: Why didn’t the Pods update automatically, and how can you make them use the new values?
+
+Expected Answer: ConfigMaps are not automatically updated in existing Pods. You need to restart the Pods (redeploy) so they can load the new ConfigMap values.
+
+Scenario:
+You mounted a ConfigMap as a volume into a Pod, but inside the container, you don’t see the expected file.
+
+Question: What could be the possible reasons?
+
+Expected Answer: Either the ConfigMap doesn’t exist, the key doesn’t exist, wrong mount path is used, or there was a YAML indentation mistake.
+
+🔹 Secrets Scenarios
+
+Scenario:
+
+You want to store a database password for your application. Would you use a ConfigMap or a Secret? Why?
+
+Expected Answer: Use a Secret because it stores data in base64-encoded format, designed for sensitive information, while ConfigMaps are for non-confidential data.
+
+Scenario:
+
+Your Pod is failing to start because it’s referencing a Secret. You checked and the Secret exists.
+
+Question: What could still be wrong?
+
+Expected Answer: The key inside the Secret might not match what the Pod spec expects, or the Secret could be in a different namespace.
+
+Scenario:
+
+You mounted a Secret as a volume, but when you check inside the container, the file permissions are too restrictive and the app can’t read it.
+
+Question: How would you fix this?
+
+Expected Answer: Adjust file permissions by using defaultMode in the volume spec, or configure the app to run with proper permissions.
+
+🔹 Mixed ConfigMap & Secret Scenarios
+
+Scenario:
+
+Your application requires both a non-sensitive config file and a sensitive password.
+
+Question: How would you design this in Kubernetes?
+
+Expected Answer: Store the config file in a ConfigMap and the password in a Secret, then mount both into the Pod either as environment variables or volumes.
+
+📌 Pro tip for interviews: Whenever you answer, add how to debug (kubectl describe pod, kubectl get cm, kubectl get secret, checking namespace). That makes your answer more practical.

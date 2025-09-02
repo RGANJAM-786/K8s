@@ -172,3 +172,6 @@ Kubernetes automatically matches PVC with PV (like connecting demand to supply).
 
 ✅ Answer:
 “Think of PV as a parking lot (storage space) managed by the admin. PVC is like a request ticket where a driver says: ‘I need one parking spot.’ Once the ticket matches with a free spot, the driver (Pod) can park there. The driver doesn’t care about the details of the lot, only that they got a spot to use.”
+
+
+👉 “hostPath volumes are like saving your files on the local hard drive of one computer. If your application moves to another computer, those files won’t follow it, so the data is lost. It’s also less secure because it directly touches the computer’s system files. That’s why in real production setups, we use shared storage systems (like cloud disks or NFS) that are available to all computers in the cluster, so the data always stays safe and accessible.”

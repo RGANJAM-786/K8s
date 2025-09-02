@@ -205,3 +205,80 @@ The first PVC is deleted and the PV is released (depending on the reclaim policy
 
 ✅ Simple Statement for Interview:
 "If two PVCs request the same kind of storage, Kubernetes binds the PV to whichever PVC is processed first. A PV can only be bound to one PVC at a time, so the second PVC will stay pending until another suitable PV is available."
+
+
+
+🔹 Volume Scenario-Based Questions
+1. emptyDir Volume
+
+Scenario:
+Your Pod uses an emptyDir volume for caching data. After a node restart, you notice the data is gone.
+
+Question: Why did this happen?
+
+Expected Answer: emptyDir volumes live only as long as the Pod runs on that node. If the Pod is deleted, restarted, or rescheduled to another node, the data inside emptyDir is lost. It’s for temporary storage, not persistence.
+
+2. hostPath Volume
+
+Scenario:
+You use a hostPath volume to store logs in /var/log/app on the node. Later, your Pod moves to another node, and the logs are missing.
+
+Question: Why did this happen?
+
+Expected Answer: hostPath directly uses the node’s filesystem. Data stays on that node only. When the Pod moves to another node, the data won’t be there, which is why it’s not portable.
+
+3. PersistentVolume + PersistentVolumeClaim
+
+Scenario:
+You created a PVC requesting 10Gi storage, but the Pod is stuck in Pending state because it cannot bind to any PV.
+
+Question: How do you debug and fix this?
+
+Expected Answer: Check if a PV with at least 10Gi and the same accessMode exists. If not, either create a matching PV or reduce the PVC request.
+
+4. Multiple PVCs
+
+Scenario:
+Two PVCs are requesting 5Gi ReadWriteOnce access mode storage. You have only one PV of 5Gi available.
+
+Question: Which PVC will bind, and what happens to the other?
+
+Expected Answer: Only the first PVC will bind to the PV. The second PVC will stay in Pending until another matching PV is created.
+
+5. Access Modes
+
+Scenario:
+Your team deployed an application that needs multiple Pods to write to the same storage. They created a PVC with ReadWriteOnce access mode. Some Pods fail to start.
+
+Question: Why is this happening?
+
+Expected Answer: ReadWriteOnce allows mounting storage on only one node. For multi-pod write access across nodes, we should use ReadWriteMany with a backend like NFS or Ceph.
+
+6. Dynamic Provisioning
+
+Scenario:
+You create a PVC, but it doesn’t bind because no PV exists. Suddenly, a PV appears and binds automatically.
+
+Question: What feature allowed this to happen?
+
+Expected Answer: Dynamic provisioning via StorageClass. The PVC triggered the provisioner to create a PV on-demand from the underlying storage provider (like AWS EBS, GCP PD, etc.).
+
+7. Node Failure
+
+Scenario:
+Your Pod is using an AWS EBS-backed PVC. The node where the Pod was running fails. The Pod is rescheduled to another node, but it can’t start.
+
+Question: Why might this happen?
+
+Expected Answer: AWS EBS volumes can only be attached to one node at a time in the same availability zone. Kubernetes needs to detach from the failed node before re-attaching to the new one.
+
+8. Permission Issues
+
+Scenario:
+You mounted a PV into your Pod, but the application fails with a “permission denied” error when trying to write data.
+
+Question: What could be wrong, and how do you fix it?
+
+Expected Answer: The file system permissions on the volume may not match the container’s user. Fix by adjusting securityContext in Pod spec (e.g., runAsUser, fsGroup) or pre-setting permissions on the volume.
+
+✅ Pro tip for interviews: Always explain why the issue happens + how to debug it (kubectl describe pvc/pv/pod) + how to fix it. That shows real-world troubleshooting skills.

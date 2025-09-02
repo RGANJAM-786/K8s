@@ -175,3 +175,33 @@ Kubernetes automatically matches PVC with PV (like connecting demand to supply).
 
 
 👉 “hostPath volumes are like saving your files on the local hard drive of one computer. If your application moves to another computer, those files won’t follow it, so the data is lost. It’s also less secure because it directly touches the computer’s system files. That’s why in real production setups, we use shared storage systems (like cloud disks or NFS) that are available to all computers in the cluster, so the data always stays safe and accessible.”
+
+
+
+👍lets assume you provide same access mode & storage for two pvc & now how the pv will bound with any one , can you explain?
+ChatGPT said:
+
+Scenario:
+
+You have two PVCs.
+
+Both request the same size, same access mode, and same storage class.
+
+You have one PV that matches these conditions.
+
+How Kubernetes decides:
+
+Kubernetes follows a first-come, first-serve approach.
+
+The first PVC that matches the PV’s requirements will bind to it.
+
+Once a PV is bound to a PVC, it cannot be claimed by another PVC (it’s exclusive binding).
+
+The second PVC will remain in Pending state until either:
+
+Another matching PV is created (manually or dynamically via StorageClass), or
+
+The first PVC is deleted and the PV is released (depending on the reclaim policy).
+
+✅ Simple Statement for Interview:
+"If two PVCs request the same kind of storage, Kubernetes binds the PV to whichever PVC is processed first. A PV can only be bound to one PVC at a time, so the second PVC will stay pending until another suitable PV is available."

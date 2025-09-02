@@ -31,23 +31,23 @@ In Kubernetes, a Pod goes into CreateContainerConfigError when Kubernetes fails 
 
 Here are the common causes you can mention in an interview:
 
-ConfigMap or Secret not found
+👍 ConfigMap or Secret not found
 
 Example: You reference a ConfigMap/Secret in your Pod spec, but it doesn’t exist in the namespace.
 
 Result → Pod cannot build container config.
 
-Wrong environment variables from ConfigMap/Secret
+👍 Wrong environment variables from ConfigMap/Secret
 
 Example: You refer to a key inside a ConfigMap that doesn’t exist.
 
-Volume issues
+👍 Volume issues
 
 Example: Pod mounts a PVC, but no matching PV is bound.
 
 Example: Wrong subPath or invalid mountPath configuration.
 
-Invalid Pod spec
+👍 Invalid Pod spec
 
 Example: Bad syntax in YAML (wrong imagePullPolicy, invalid field name, etc.).
 

@@ -1,4 +1,5 @@
 ConfigMaps and Secrets in Kubernetes
+
 🔹 ConfigMap
 
 Used to store non-confidential configuration data (like environment variables, config files, URLs, app settings).
@@ -18,3 +19,5 @@ Imagine you’re deploying an application that connects to a database.
 The database hostname is not sensitive → goes into a ConfigMap.
 
 The database password is sensitive → goes into a Secret.
+
+👍 ConfigMap does not provide secrecy or encryption. If the data you want to store are confidential, use a Secret rather than a ConfigMap, or use additional (third party) tools to keep your data private.

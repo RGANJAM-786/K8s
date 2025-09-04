@@ -21,6 +21,10 @@ Both the PV and the underlying storage (like AWS EBS, GCP PD, Azure Disk) are de
 
 Use case: For temporary workloads where you don’t care about keeping data.
 
+
+<img width="737" height="422" alt="image" src="https://github.com/user-attachments/assets/86c4bc9c-3315-469a-bdb1-e8402cb1ccfc" />
+
+
 🔹Recycle (⚠️ deprecated)
 
 PV’s data is scrubbed (files deleted with rm -rf /thevolume/*) and then the PV becomes Available again.

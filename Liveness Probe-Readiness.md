@@ -35,6 +35,20 @@ Readiness probe waits 30s, then checks /ready. Until it passes, Kubernetes won�
 
 
 
+
+🟢 Step 3: How it Works in Real Time
+
+When the Pod starts:
+
+Liveness probe waits 60s, then keeps checking if the app is alive. If /healthz fails → container is restarted.
+
+Readiness probe waits 30s, then checks /ready. Until it passes, Kubernetes won’t send traffic to the Pod.
+
+✅ Interview-style Explanation
+
+“In real life, developers give us the health-check endpoints or commands, because they know the app logic. For example, /healthz for liveness and /ready for readiness. As a DevOps engineer, I configure these probes in Kubernetes YAML with proper delay and interval values. This ensures Pods only get traffic when they’re truly ready, and get restarted if they’re stuck.”
+
+
 🔹 Liveness Probe Scenarios
 
 1. Stuck Application

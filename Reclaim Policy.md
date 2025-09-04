@@ -5,7 +5,7 @@ This is controlled by the reclaim policy of the PV.
 
 🔹 Types of Reclaim Policies (Status)
 
-Retain
+🔹Retain
 
 PV is not deleted when the PVC is deleted.
 
@@ -15,13 +15,13 @@ The PV goes into a Released state but is not yet available for new PVCs until an
 
 Use case: When data is important (e.g., database data) and should not be lost automatically.
 
-Delete
+🔹Delete
 
 Both the PV and the underlying storage (like AWS EBS, GCP PD, Azure Disk) are deleted automatically when the PVC is deleted.
 
 Use case: For temporary workloads where you don’t care about keeping data.
 
-Recycle (⚠️ deprecated)
+🔹Recycle (⚠️ deprecated)
 
 PV’s data is scrubbed (files deleted with rm -rf /thevolume/*) and then the PV becomes Available again.
 
@@ -50,13 +50,7 @@ If reclaim policy = Recycle (old) → PV is scrubbed and goes back to Available.
 ✅ Interview-style Answer:
 “In Kubernetes, reclaim policy defines what happens to a PersistentVolume after its claim (PVC) is deleted. There are three types: Retain (data preserved, PV goes to Released state), Delete (PV and storage are deleted), and Recycle (deprecated). A PV can be in four states — Available, Bound, Released, and Failed — depending on whether it’s free, in use, released after PVC deletion, or failed due to errors.”
 
-👉 Do you want me to also create a real-time scenario question (like what happens if PVC with Retain policy is deleted in production)?
 
-You said:
-yes
-ChatGPT said:
-
-Perfect 👍 Here’s a real-time scenario-based interview Q&A for Retain Policy in Kubernetes:
 
 🔹 Scenario 1: Database with Retain Policy
 

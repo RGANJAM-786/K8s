@@ -10,7 +10,52 @@ The liveness probe keeps checking the container’s health. If it fails, Kuberne
 The readiness probe checks if the container is ready to serve traffic. If it fails, Kubernetes keeps the Pod running but temporarily removes it from the Service load balancer until it becomes ready again.”
 
 
+🟢 Interview-friendly answer:
+
+“Developers usually define what indicates an app is healthy or ready, like a health-check endpoint or command. As a DevOps engineer, I take those details and configure liveness and readiness probes in the Pod spec. It’s a collaboration — developers know the application behavior, and DevOps translates that into Kubernetes configuration.”
 🔹 Liveness Probe Scenarios
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: myapp-pod
+spec:
+  containers:
+  - name: myapp
+    image: myapp:1.0
+    ports:
+    - containerPort: 8080
+
+    # Liveness Probe → Is container healthy?
+    livenessProbe:
+      httpGet:
+        path: /healthz
+        port: 8080
+      initialDelaySeconds: 60   # wait before first check
+      periodSeconds: 10         # check every 10s
+
+    # Readiness Probe → Is container ready for traffic?
+    readinessProbe:
+      httpGet:
+        path: /ready
+        port: 8080
+      initialDelaySeconds: 30   # wait for app startup
+      periodSeconds: 5          # check every 5s
+
+
+🟢 Step 3: How it Works in Real Time
+
+When the Pod starts:
+
+Liveness probe waits 60s, then keeps checking if the app is alive. If /healthz fails → container is restarted.
+
+Readiness probe waits 30s, then checks /ready. Until it passes, Kubernetes won’t send traffic to the Pod.
+
+✅ Interview-style Explanation
+
+“In real life, developers give us the health-check endpoints or commands, because they know the app logic. For example, /healthz for liveness and /ready for readiness. As a DevOps engineer, I configure these probes in Kubernetes YAML with proper delay and interval values. This ensures Pods only get traffic when they’re truly ready, and get restarted if they’re stuck.”
+
+
 1. Stuck Application
 
 Scenario: Your application is running, but due to a memory leak, it has stopped responding. The Pod status shows Running, but no requests are served.

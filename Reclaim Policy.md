@@ -15,6 +15,44 @@ The PV goes into a Released state but is not yet available for new PVCs until an
 
 Use case: When data is important (e.g., database data) and should not be lost automatically.
 
+🔹 How to get data back?
+
+To reuse the PV and recover data:
+
+# Check PV status You’ll see the PV in Released state
+
+kubectl get pv
+
+# Remove old claim reference, Edit the PV to clear the claimRef (since it still points to the deleted PVC).
+
+kubectl edit pv <pv-name>
+
+
+Remove the section under:
+
+claimRef:
+  ...
+
+
+# Create a new PVC
+
+Write a new PVC YAML that requests the same storage size, access mode, and storageClass as the PV.
+Bind PV to PVC
+
+Now, since the PV is available and matches, Kubernetes will bind it to the new PVC.
+
+The Pod using this PVC will now have access to the same data as before.
+
+🔹 Important Note
+
+This recovery works only if reclaim policy = Retain.
+
+If it was Delete, the storage backend (like AWS EBS) would already be deleted → data is gone.
+
+✅ Interview-ready Answer:
+“If a PVC is deleted and the PV goes into Released state with Retain policy, the data is still safe. To recover it, we need to manually remove the old claimRef from the PV and create a new PVC that matches the PV specs. Kubernetes will then rebind the PV to the new PVC, and the data becomes accessible again.”
+
+
 🔹Delete
 
 Both the PV and the underlying storage (like AWS EBS, GCP PD, Azure Disk) are deleted automatically when the PVC is deleted.
@@ -44,7 +82,7 @@ Bound → PV is bound to a PVC and in use.
 
 Released → PVC was deleted, but PV still exists (data may still be there). Happens when reclaim policy is Retain.
 
-Failed → PV has failed due to some error.
+Failed → PV has failed (when evr you used reclaim policy as delete then if you delete the pvc then pv status will be shown as failed)
 
 🔹 When do these come into picture?
 

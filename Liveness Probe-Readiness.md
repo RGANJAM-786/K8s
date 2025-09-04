@@ -50,7 +50,8 @@ Readiness probe waits 30s, then checks /ready. Until it passes, Kubernetes wonâ€
 
 
 
-<img width="1364" height="615" alt="image" src="https://github.com/user-attachments/assets/e7414210-7c0d-4569-85c7-120807a1339b" />
+<img width="1245" height="560" alt="image" src="https://github.com/user-attachments/assets/ab7d699c-94d1-4901-adbb-9df0ca68d527" />
+
 
 
 

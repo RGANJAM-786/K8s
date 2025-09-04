@@ -27,6 +27,9 @@ PV’s data is scrubbed (files deleted with rm -rf /thevolume/*) and then the PV
 
 This was insecure and is deprecated.
 
+Default Reclaim policy is Retain
+
+
 🔹 PV Lifecycle Statuses
 
 A PersistentVolume can be in one of these statuses:

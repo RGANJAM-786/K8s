@@ -13,7 +13,7 @@ The readiness probe checks if the container is ready to serve traffic. If it fai
 🟢 Interview-friendly answer:
 
 “Developers usually define what indicates an app is healthy or ready, like a health-check endpoint or command. As a DevOps engineer, I take those details and configure liveness and readiness probes in the Pod spec. It’s a collaboration — developers know the application behavior, and DevOps translates that into Kubernetes configuration.”
-🔹 Liveness Probe Scenarios
+
 
 apiVersion: v1
 kind: Pod
@@ -43,6 +43,7 @@ spec:
       periodSeconds: 5          # check every 5s
 
 
+
 🟢 Step 3: How it Works in Real Time
 
 When the Pod starts:
@@ -55,6 +56,8 @@ Readiness probe waits 30s, then checks /ready. Until it passes, Kubernetes won�
 
 “In real life, developers give us the health-check endpoints or commands, because they know the app logic. For example, /healthz for liveness and /ready for readiness. As a DevOps engineer, I configure these probes in Kubernetes YAML with proper delay and interval values. This ensures Pods only get traffic when they’re truly ready, and get restarted if they’re stuck.”
 
+
+🔹 Liveness Probe Scenarios
 
 1. Stuck Application
 

@@ -167,6 +167,15 @@ mysql.database.svc.cluster.local:3306
 ✅ Simple Statement for Interview:
 “By default, pods across namespaces can communicate. But if NetworkPolicies are used, we must explicitly allow cross-namespace communication by writing a policy that permits traffic from one namespace to another.”
 
+👉 “If you want to allow traffic only to two specific Pods, which type of label selector would you use — equality-based or set-based? Is it possible to achieve this with an equality-based selector?”
+
+✅ Answer for interview:
+“If I want to allow traffic to two different pods, equality-based selectors won’t work because they only match one value. Instead, I would use set-based selectors (In operator), which let me target multiple pods at once.”
+
+
+
+<img width="948" height="606" alt="image" src="https://github.com/user-attachments/assets/4f5122c1-b59d-4283-ad56-dcf18010b5a6" />
+
 
 
 # Scenario based questions

@@ -132,3 +132,77 @@ Here, DB Pods are locked down so only Pods labeled app=backend can access port 5
 <img width="962" height="701" alt="image" src="https://github.com/user-attachments/assets/5aa8dd4c-bfe2-4af9-938c-3d4488578709" />
 
 
+Lets assume if you want to communicate with pods which are in other name space than you need to provide fully qualified domain name as shown below svc.cluster.local:27017
+
+
+👉 curl -v telnet://mongosvc.prod.svc.cluster.local:27017   --> fully qualified domain name
+
+
+1. Default Behavior
+
+Q: If you have two namespaces (frontend and backend) and no NetworkPolicy is applied, can pods in frontend talk to pods in backend?
+A:
+Yes ✅. By default, Kubernetes allows all pods in all namespaces to talk to each other. NetworkPolicies only restrict traffic when applied. If none exist, everything is open.
+
+2. Restricting Communication
+
+Q: You want to restrict traffic so only frontend namespace can access backend namespace pods. How do you do it?
+A:
+I would write a NetworkPolicy in the backend namespace that only allows ingress traffic from pods in the frontend namespace. This way, other namespaces are blocked automatically.
+
+3. Namespace Isolation
+
+Q: You have frontend, backend, and testing namespaces. But testing pods are also hitting backend. How do you block testing?
+A:
+I’d apply a NetworkPolicy in the backend namespace that only allows ingress from frontend. Since policies are “deny by default” after being applied, the testing namespace won’t get access anymore.
+
+4. Port-Level Access Control
+
+Q: MySQL pod in database namespace should only allow frontend pods to access port 3306. How do you do it?
+A:
+In the NetworkPolicy, I would specify:
+
+Ingress allowed only from frontend namespace
+
+Restrict traffic to TCP port 3306
+That ensures only the right namespace and port are open.
+
+5. Troubleshooting Scenario
+
+Q: A developer says pods in frontend can’t reach backend API after NetworkPolicy was applied. How would you debug?
+A:
+
+First, check if the NetworkPolicy in backend allows ingress from frontend.
+
+Verify labels used in the policy match pod labels.
+
+Check if the service DNS (backend-service.backend.svc.cluster.local) is correct.
+
+If policy is too restrictive, update it to explicitly allow the right namespace + port.
+
+6. Service DNS Usage
+
+Q: How does a pod in frontend access a service in backend?
+A:
+It should use the full DNS name:
+<service-name>.<namespace>.svc.cluster.local
+Example: backend-service.backend.svc.cluster.local.
+If they just use backend-service, Kubernetes will only search in their own namespace, so it won’t work.
+
+7. Policy Direction
+
+Q: If you apply a NetworkPolicy in the backend namespace, does it control traffic leaving frontend?
+A:
+No ❌. NetworkPolicies only apply to pods in the same namespace where they are defined.
+So a policy in backend controls ingress/egress of backend pods, not frontend.
+
+8. Real-World Security Requirement
+
+Q: Your company wants strict namespace isolation. How would you implement it?
+A:
+I would:
+
+Deny all ingress by default in each namespace.
+
+Then write explicit NetworkPolicies to only allow communication between trusted namespaces (like frontend → backend, backend → database).
+This way, traffic is locked down, and only required flows are allowed.

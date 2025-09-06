@@ -137,6 +137,39 @@ Lets assume if you want to communicate with pods which are in other name space t
 
 👉 curl -v telnet://mongosvc.prod.svc.cluster.local:27017   --> fully qualified domain name
 
+🔹 Default Behavior (without NetworkPolicy)
+
+In Kubernetes, by default all Pods can talk to each other across namespaces.
+
+Example: A Pod in namespace-A can access a Pod in namespace-B using its ClusterIP Service name or Pod IP.
+
+The service DNS would look like: 
+
+<service-name>.<namespace>.svc.cluster.local
+
+🔹 When NetworkPolicies Are Applied
+
+If NetworkPolicies are enabled, communication is blocked unless you explicitly allow it.
+So, if you want a Pod in namespace-A to access a Pod in namespace-B, you need to:
+
+Create a NetworkPolicy in namespace-B that allows incoming traffic from Pods in namespace-A.
+Example: Allowing Pods from frontend namespace to talk to mysql Pods in database namespace.
+
+<img width="786" height="632" alt="image" src="https://github.com/user-attachments/assets/f8c64314-4eb0-4ae7-be13-adae6d504a62" />
+
+🔹 How You’d Communicate (Real Example)
+
+Pod in frontend namespace calls MySQL in database namespace:
+
+mysql.database.svc.cluster.local:3306
+
+
+✅ Simple Statement for Interview:
+“By default, pods across namespaces can communicate. But if NetworkPolicies are used, we must explicitly allow cross-namespace communication by writing a policy that permits traffic from one namespace to another.”
+
+
+
+
 
 1. Default Behavior
 

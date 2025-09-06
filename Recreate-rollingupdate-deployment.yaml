@@ -80,3 +80,64 @@ spec:
   - port: 80
     targetPort: 8080
 
+euality based selector vs set based selector 
+Right now your Deployment selector is:
+
+selector:
+  matchLabels:
+    app: javawebapp
+
+
+This is equality-based (only app=javawebapp).
+
+
+
+🔹 If you want to use set-based labels
+
+You replace matchLabels with matchExpressions. Example:
+
+selector:
+  matchExpressions:
+    - key: app
+      operator: In
+      values:
+        - javawebapp
+        - testapp
+
+🔹 Explanation
+
+key: app → the label key we are checking.
+
+operator: In → means “match if the label value is one of these.”
+
+values: [javawebapp, testapp] → Pods with app=javawebapp OR app=testapp will be selected.
+
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: javawebappdep
+  namespace: test-ns
+spec:
+  replicas: 2
+  strategy:
+    type: Recreate
+  selector:
+    matchExpressions:
+      - key: app
+        operator: In
+        values:
+          - javawebapp
+          - testapp
+  template:
+    metadata:
+      name: javawebapp
+      labels:
+        app: javawebapp   # Pod will have this label
+    spec:
+      containers:
+      - name: javawebapp
+        image: kkeducation12345/spring-app:1.0.5
+        ports:
+        - containerPort: 8080
+

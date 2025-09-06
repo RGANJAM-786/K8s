@@ -69,3 +69,81 @@ Storage in CI/CD
 
 👉 In your CI/CD pipeline, you need temporary storage for builds. How would you set this up in Kubernetes?
 (Expected: Use a StorageClass with fast ephemeral storage, or configure a dynamic volume with Delete reclaim policy so that storage is cleaned up when PVC is removed.)
+
+
+
+👉 lets assume you use reclaim policy as retain & dynamic volumes for your application & due to some reasons the pvc got deleted what happens?
+
+🔹 Situation:
+
+You are using dynamic provisioning (via StorageClass).
+
+The ReclaimPolicy is set to Retain.
+
+The PVC gets deleted.
+
+🔹 What happens:
+
+The PVC is deleted.
+
+The PV that was dynamically created changes its status from Bound → Released.
+
+Since the ReclaimPolicy is Retain, Kubernetes will NOT delete the actual storage backend (like the NFS subdirectory or EBS volume). The data is still safe.
+
+However, the Released PV cannot automatically bind to a new PVC because it still has a claimRef field pointing to the old PVC.
+
+🔹 How to recover:
+
+As a DevOps engineer, if I need the data back, I can either:
+
+Manually create a new PVC that matches the PV’s storage class, size, and access mode. Then update the PV’s claimRef to point to this new PVC.
+
+Or manually edit the PV (kubectl edit pv <name>) and remove the old claimRef, then bind it to a new PVC.
+
+🔹 Final Interview-Ready Statement:
+
+“If I use Retain policy with dynamic provisioning, deleting the PVC will leave the PV in Released state. The actual storage and data remain safe, but the PV won’t bind to a new PVC automatically. As a DevOps engineer, I need to manually reattach it to a new PVC if I want to recover the data.”
+
+👉 This shows you understand both what happens automatically and what you must do manually.
+
+Do you want me to also create a comparison answer for the same scenario with ReclaimPolicy = Delete so you can contrast both in an interview?
+
+
+ 👍 Let’s compare Retain vs Delete ReclaimPolicy with the same scenario.
+
+🔹 Scenario:
+
+You are using dynamic volumes via a StorageClass.
+The application’s PVC is accidentally deleted.
+
+✅ Case 1: ReclaimPolicy = Retain
+
+PVC is deleted → PV moves from Bound → Released.
+
+Data on the backend storage (NFS subdir, EBS volume, etc.) is NOT deleted.
+
+PV still has a claimRef, so it cannot automatically bind to a new PVC.
+
+Action required: Manually reattach PV to a new PVC (edit claimRef or recreate PVC with same details).
+
+👉 Use case: When data is important and should never be auto-deleted (e.g., databases, logs).
+
+✅ Case 2: ReclaimPolicy = Delete
+
+PVC is deleted → PV is also deleted automatically.
+
+The underlying storage is deleted too (EBS volume removed, NFS subdir cleaned).
+
+Data is lost permanently.
+
+No manual recovery possible.
+
+👉 Use case: For temporary or test data where persistence is not required.
+
+📝 Interview-Ready Summary:
+
+With Retain, data stays safe, but you need manual steps to reuse it.
+
+With Delete, both PV and data are removed automatically.
+
+So, Retain is used in production for critical apps (like databases), and Delete is used in dev/test environments for temporary workloads.

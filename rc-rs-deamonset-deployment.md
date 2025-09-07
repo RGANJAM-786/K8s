@@ -71,6 +71,152 @@ So in real-world setups, we prefer RollingUpdate so that rollback is also smooth
 If asked “How does Kubernetes remember the old version?” → You can say:
 “Kubernetes Deployments keep a history of ReplicaSets. Each time we update the Deployment, it creates a new ReplicaSet. During rollback, Kubernetes simply switches back to the earlier ReplicaSet.”
 
+Perfect 👍 Rolling updates & rollbacks are hot interview topics because they directly connect to real-world production deployments. Let’s create scenario-based interview questions with detailed, easy-to-understand answers.
+
+
+🔹 Rolling Updates
+
+
+Q1. You have a Deployment running version v1 of your app. Now you want to upgrade to version v2 without downtime. How will you do it in Kubernetes?
+👉 Answer:
+
+In Kubernetes, Deployments support rolling updates.
+
+I would update the Deployment image:
+
+# kubectl set image deployment myapp myapp=app:v2
+
+
+Kubernetes will create a new ReplicaSet for v2 Pods.
+
+It will gradually replace old v1 Pods with new v2 Pods (one by one or based on maxUnavailable / maxSurge values).
+
+During the process, users can still access the app, so there’s no downtime.
+
+
+Q2. During a rolling update, what happens if half the new Pods fail to start?
+👉 Answer:
+
+Kubernetes rollout will pause automatically if new Pods are not becoming healthy.
+
+The old Pods will still be running and serving traffic.
+
+I can check status with:
+
+# kubectl rollout status deployment myapp
+
+I can either fix the issue (like wrong image/config) and continue rollout, or perform a rollback to restore the previous version.
+
+
+Q3. How can you control the speed of a rolling update?
+👉 Answer:
+
+By using maxUnavailable and maxSurge in the Deployment spec.
+
+Example:
+
+strategy:
+  type: RollingUpdate
+  rollingUpdate:
+    maxUnavailable: 1
+    maxSurge: 2
+
+
+This means: at most 1 Pod can be unavailable during the rollout, and 2 extra Pods can be created temporarily.
+
+These values let me fine-tune rollout speed vs. stability depending on traffic load.
+
+
+Q4. If you set strategy type to Recreate, how is it different from rolling update?
+👉 Answer:
+
+With Recreate: all old Pods are deleted first, then new Pods are created. → This causes downtime.
+
+With RollingUpdate: old Pods are replaced gradually while keeping service available → zero downtime.
+
+In production, we almost always use RollingUpdate.
+
+
+Q5. Can a rolling update cause downtime if misconfigured?
+👉 Answer:
+
+Yes ✅. Example:
+
+If maxUnavailable=100%, then Kubernetes may delete all Pods before creating new ones → downtime.
+
+If readiness/liveness probes are not configured correctly, traffic may go to half-ready Pods, causing failures.
+
+So, correct probe configuration and rolling strategy tuning are critical.
+
+
+🔹 Rollbacks
+
+Q6. You performed a rolling update, but the new version has bugs. How can you roll back quickly?
+👉 Answer:
+
+Kubernetes stores revision history of Deployments.
+
+To roll back to the previous stable version, I just run:
+
+# kubectl rollout undo deployment myapp
+
+
+If I want to roll back to a specific version:
+
+kubectl rollout undo deployment myapp --to-revision=2
+
+
+The rollback itself is also a rolling process → no downtime.
+
+
+Q7. What happens if you roll back a Deployment but the rollback also fails?
+👉 Answer:
+
+If rollback Pods fail, Kubernetes will again pause the rollout.
+
+The system will not delete the old stable Pods until the new Pods are ready.
+
+So, traffic keeps flowing to the last working version.
+
+As a DevOps engineer, I’d troubleshoot using kubectl describe pod and kubectl logs.
+
+
+Q8. Can you prevent rollbacks from happening automatically?
+👉 Answer:
+
+Yes. By setting:
+
+spec:
+  revisionHistoryLimit: 0
+
+
+This tells Kubernetes not to keep old ReplicaSets.
+
+But in practice, we usually keep a history (default is 10 revisions), so we can rollback if needed.
+
+
+Q9. If you delete the old ReplicaSet after a rollout, can you still roll back?
+👉 Answer:
+
+No ❌. Rollback requires the old ReplicaSet.
+
+If you delete it, Kubernetes has no version to go back to.
+
+That’s why we usually keep some history of ReplicaSets (using revisionHistoryLimit).
+
+
+
+Q10. Suppose rollback was successful, but you don’t want such bugs happening again. What measures would you take?
+👉 Answer:
+
+Add proper readiness and liveness probes so that broken Pods don’t get traffic.
+
+Use staging/testing environments before production rollouts.
+
+Enable canary deployments or blue-green deployments for safer upgrades.
+
+Automate monitoring alerts to detect issues quickly.
+
 
 
 ❓ Why use Deployment when we already have ReplicaSet?
@@ -190,4 +336,195 @@ DaemonSet in Kubernetes ensures that one copy of a Pod runs on every node in the
 “A ReplicaSet or RC only ensures a number of Pods are running, but it doesn’t control where they run. If I set replicas=5, all Pods could still end up on the same node. A DaemonSet is designed for node-level workloads — it guarantees one Pod runs on every node in the cluster. That’s why DaemonSets are used for things like monitoring agents, log collectors, or network plugins, where you need one agent per node. ReplicaSet/RC are for scaling applications, DaemonSet is for per-node system services.”
 
 
+🔹 ReplicationController (RC)
+
+Q1. Your application is running in Pods managed by a ReplicationController. Suddenly, one Pod crashes. What will the RC do?
+👉 ReplicationController always checks if the number of Pods running matches the number you asked for. For example, if you set replicas=3, it expects 3 Pods running all the time.
+
+If one Pod crashes, RC immediately notices that only 2 Pods are left.
+
+It then creates a new Pod to bring the count back to 3.
+
+This is why RC ensures high availability — your application never goes below the required count.
+
+Q2. If you manually delete a Pod created by an RC, what happens?
+👉 When you delete a Pod (let’s say via kubectl delete pod <pod-name>), Kubernetes removes it.
+
+The RC detects the missing Pod and automatically creates a new Pod with the same specification.
+
+This means you don’t have to manually restart applications if they are deleted by mistake.
+
+Example: if you had 4 replicas, and you deleted 1, RC will quickly recreate 1 to keep the replica count = 4.
+
+Q3. Can a ReplicationController manage Pods without labels?
+👉 No ❌. RC uses labels and selectors to know which Pods belong to it.
+
+If a Pod has no labels, RC doesn’t “see” it.
+
+Labels are like “tags” or “IDs” that connect Pods with their controllers.
+
+Example: If RC has a selector app=web, but your Pod has no app=web label, RC will ignore it.
+
+Q4. If your RC is configured with replicas=3 and someone manually scales it down to 1 Pod, what happens?
+👉 RC always follows the latest configuration.
+
+If you change it with kubectl scale rc myapp --replicas=1, RC stops managing 3 Pods and only keeps 1.
+
+The other 2 Pods will be removed.
+
+So RC doesn’t argue with you, it just enforces the replica count you set.
+
+Q5. Why don’t we use ReplicationController much in production anymore?
+👉 RC is considered old/legacy.
+
+It only supports equality-based selectors (app=web).
+
+It doesn’t support advanced rolling updates or rollbacks.
+
+That’s why in modern Kubernetes, we use ReplicaSets and Deployments.
+
+🔹 ReplicaSet (RS)
+
+Q1. If you want to run 5 Pods of the same application, how would a ReplicaSet ensure they are always maintained?
+👉 You define a ReplicaSet with replicas: 5.
+
+Kubernetes will create 5 Pods.
+
+If 1 Pod crashes, RS creates 1 new Pod.
+
+If 2 Pods are deleted manually, RS creates 2 new Pods.
+
+If someone adds an extra Pod with matching labels, RS may actually reduce new Pod creation (because it already sees the total = 5).
+
+So RS guarantees the correct number of Pods based on your definition.
+
+Q2. What happens if a Pod managed by a ReplicaSet is modified manually (like labels are changed)?
+👉 Imagine RS is looking for Pods with app=web.
+
+If you change one Pod’s label from app=web → app=db, RS will stop managing it.
+
+RS will then notice only 4 Pods match its selector instead of 5, and it creates a new one.
+
+Result: the Pod with changed label is left unmanaged, and RS creates a fresh Pod to maintain its desired state.
+
+Q3. You create a ReplicaSet with matchLabels: app=web. If another Pod with label app=web is created manually, will the RS manage it?
+👉 Yes ✅.
+
+RS doesn’t care who created the Pod. If the labels match its selector, it counts that Pod as part of its set.
+
+So if RS wants 3 Pods, and you manually create 1 with app=web, RS will think “okay, I already have 1, I’ll only create 2 more.”
+
+Q4. Can a ReplicaSet directly help in version upgrades of your application?
+👉 No ❌.
+
+If you change the Pod template in the RS (like updating the image), all existing Pods are deleted and replaced with new ones immediately.
+
+This means downtime (because old Pods stop before new Pods are fully ready).
+
+That’s why we don’t use ReplicaSet alone for upgrades. Instead, we use Deployment because it does rolling updates.
+
+Q5. In what scenarios would you use a ReplicaSet directly?
+👉 Very rarely in production.
+
+Sometimes when you want a fixed number of Pods running with no need for rollouts.
+
+Mostly, RS is used internally by Deployments, not directly by users.
+
+🔹 Deployment
+
+Q1. You deployed an app with a Deployment (replicas=3). A new version is released. How will you roll out the update with zero downtime?
+👉 With Deployment, you just update the image:
+
+kubectl set image deployment myapp myapp=nginx:2.0
+
+
+Kubernetes creates a new ReplicaSet with the new version.
+
+Then it starts new Pods gradually, while removing old Pods one by one.
+
+During this time, both versions run together until the update finishes.
+
+Result: zero downtime because your app never goes completely offline.
+
+Q2. Suppose after upgrading your Deployment, the app is not working. How can you roll back?
+👉 You can simply run:
+
+kubectl rollout undo deployment myapp
+
+
+This reverts to the previous ReplicaSet (the old version).
+
+Kubernetes also deletes the bad ReplicaSet.
+
+Since rollback also happens in a rolling manner, users don’t see downtime.
+
+Q3. During a rollout, some Pods are stuck in CrashLoopBackOff. How do you troubleshoot?
+👉 Steps you might take:
+
+Check rollout status:
+
+kubectl rollout status deployment myapp
+
+
+→ This shows if rollout is stuck.
+
+Describe Pod:
+
+kubectl describe pod <pod-name>
+
+
+→ Look for events like “image not found” or “CrashLoopBackOff”.
+
+Logs:
+
+kubectl logs <pod-name>
+
+
+→ Check application errors.
+
+After fixing the error (e.g., typo in image name, config issue), reapply the Deployment.
+
+Q4. What’s the difference between Recreate and RollingUpdate strategies?
+👉
+
+Recreate: Deletes all old Pods first, then creates new Pods. App will be down until new Pods are ready → downtime ❌.
+
+RollingUpdate (default): Slowly replaces Pods one by one, keeping service available the whole time → no downtime ✅.
+
+Q5. If you delete a Deployment, what happens to ReplicaSets and Pods?
+👉 Deployment is the “parent” object. If you delete it:
+
+The ReplicaSets created by it are also deleted.
+
+The Pods belonging to those ReplicaSets are also deleted.
+
+Everything under that Deployment is cleaned up.
+
+Q6. If HPA is scaling your Deployment up to 10 Pods, what role does Deployment and RS play?
+👉
+
+HPA decides the number of Pods needed (e.g., based on CPU).
+
+It updates the Deployment to replicas=10.
+
+Deployment updates its underlying ReplicaSet.
+
+RS ensures exactly 10 Pods are running.
+So HPA, Deployment, and RS all work together.
+
+Q7. Why use Deployment instead of ReplicaSet directly?
+👉 Deployment is like a smart manager sitting on top of ReplicaSet.
+
+RS = maintains Pod count only.
+
+Deployment = maintains Pod count plus:
+
+Rollouts
+
+Rollbacks
+
+Version history
+
+Zero downtime upgrades
+That’s why in real projects, Deployment is always used.
 

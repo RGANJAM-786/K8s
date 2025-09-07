@@ -78,6 +78,7 @@ Perfect 👍 Rolling updates & rollbacks are hot interview topics because they d
 
 
 Q1. You have a Deployment running version v1 of your app. Now you want to upgrade to version v2 without downtime. How will you do it in Kubernetes?
+
 👉 Answer:
 
 In Kubernetes, Deployments support rolling updates.
@@ -95,6 +96,7 @@ During the process, users can still access the app, so there’s no downtime.
 
 
 Q2. During a rolling update, what happens if half the new Pods fail to start?
+
 👉 Answer:
 
 Kubernetes rollout will pause automatically if new Pods are not becoming healthy.
@@ -109,6 +111,7 @@ I can either fix the issue (like wrong image/config) and continue rollout, or pe
 
 
 Q3. How can you control the speed of a rolling update?
+
 👉 Answer:
 
 By using maxUnavailable and maxSurge in the Deployment spec.
@@ -128,6 +131,7 @@ These values let me fine-tune rollout speed vs. stability depending on traffic l
 
 
 Q4. If you set strategy type to Recreate, how is it different from rolling update?
+
 👉 Answer:
 
 With Recreate: all old Pods are deleted first, then new Pods are created. → This causes downtime.
@@ -138,6 +142,7 @@ In production, we almost always use RollingUpdate.
 
 
 Q5. Can a rolling update cause downtime if misconfigured?
+
 👉 Answer:
 
 Yes ✅. Example:
@@ -152,6 +157,7 @@ So, correct probe configuration and rolling strategy tuning are critical.
 🔹 Rollbacks
 
 Q6. You performed a rolling update, but the new version has bugs. How can you roll back quickly?
+
 👉 Answer:
 
 Kubernetes stores revision history of Deployments.
@@ -170,6 +176,7 @@ The rollback itself is also a rolling process → no downtime.
 
 
 Q7. What happens if you roll back a Deployment but the rollback also fails?
+
 👉 Answer:
 
 If rollback Pods fail, Kubernetes will again pause the rollout.
@@ -182,6 +189,7 @@ As a DevOps engineer, I’d troubleshoot using kubectl describe pod and kubectl 
 
 
 Q8. Can you prevent rollbacks from happening automatically?
+
 👉 Answer:
 
 Yes. By setting:
@@ -196,6 +204,7 @@ But in practice, we usually keep a history (default is 10 revisions), so we can 
 
 
 Q9. If you delete the old ReplicaSet after a rollout, can you still roll back?
+
 👉 Answer:
 
 No ❌. Rollback requires the old ReplicaSet.
@@ -207,6 +216,7 @@ That’s why we usually keep some history of ReplicaSets (using revisionHistoryL
 
 
 Q10. Suppose rollback was successful, but you don’t want such bugs happening again. What measures would you take?
+
 👉 Answer:
 
 Add proper readiness and liveness probes so that broken Pods don’t get traffic.

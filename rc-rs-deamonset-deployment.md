@@ -32,6 +32,7 @@ directly.”
 
 
 🚀 Types of Kubernetes Deployments
+
 1️⃣ Recreate Deployment
 
 How it works: K8s deletes all old Pods first, then creates new ones.
@@ -51,6 +52,7 @@ strategy:
 
 
 ⚠️ Drawback → Your app will be offline during rollout.
+
 
 2️⃣ Rolling Update (Default)
 

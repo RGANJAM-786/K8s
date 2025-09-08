@@ -40,13 +40,7 @@ ServiceAccount → Used by Pods (not humans) to interact with the cluster.
 
 Subjects → The entities (users, groups, or service accounts) to which roles are assigned.
 
-👉 Here:
 
-Role pod-reader allows get, list, watch on Pods in dev.
-
-ServiceAccount dev-reader is created.
-
-RoleBinding connects them → now any Pod using this ServiceAccount can read Pods in dev but cannot delete or modify them.
 
 🔹 How I used RBAC in my projects
 

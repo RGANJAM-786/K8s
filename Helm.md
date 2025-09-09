@@ -424,3 +424,6 @@ If missing Secret/ConfigMap → create it, then redeploy.
 “In my project, we use Helm for Kubernetes deployments. Each environment has its own values.yaml for customization.
 When a new build is triggered, the pipeline updates the image tag dynamically in Helm, and deploys the release. If something goes wrong, I check rollout status, logs, and Helm history. Since Helm keeps track of release history, I can rollback instantly with helm rollback.
 A real example was when a bad image tag was pushed; the pods went into CrashLoopBackOff. I quickly identified it, rolled back to the previous version, and then rebuilt the image with the correct tag. This reduced downtime and kept the app stable.”
+
+
+Please check these is a help commands cheat sheet in downloads folder

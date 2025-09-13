@@ -60,7 +60,7 @@ Used a Readiness Probe to delay traffic until the app connected successfully to 
 Used a Liveness Probe to restart the app if it got stuck due to long-running queries.
 
 
-🔹 What is a Sidecar Container?
+# What is a Sidecar Container?
 
 A Sidecar container is a container that runs alongside the main application container in the same Pod.
 

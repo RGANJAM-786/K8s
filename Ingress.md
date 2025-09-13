@@ -8,25 +8,6 @@ That’s where Ingress comes in.
 👉 Ingress is a Kubernetes object that manages external access (HTTP/HTTPS) to services inside the cluster.
 It acts like a smart router or entry point for your cluster traffic.
 
-🔹 Key Features of Ingress
-
-Centralized Entry Point – You don’t need a separate LoadBalancer for each service.
-
-Path-based Routing – Example:
-
-myapp.com/api → Backend service A
-
-myapp.com/web → Backend service B
-
-Host-based Routing – Example:
-
-api.myapp.com → Backend service A
-
-web.myapp.com → Backend service B
-
-TLS/SSL Termination – Ingress can handle HTTPS by managing certificates.
-
-Cost Efficient – Instead of creating multiple LoadBalancers, you use a single Ingress Controller.
 
 🔹 How does it work?
 

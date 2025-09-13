@@ -45,6 +45,43 @@ For databases or message queues (MySQL, PostgreSQL, Kafka), I use StatefulSets �
 We had a Jenkins Deployment for CI/CD (stateless, only configs stored in PVC).
 We also had a MongoDB StatefulSet because each replica needed persistent storage and unique identity.
 
+
+✅ PVC behavior in Deployment vs StatefulSet
+
+ ✅ Deployment
+
+PVCs are not automatically created for each pod.
+
+If you want storage, you must create a PVC separately and mount it in the Deployment spec.
+
+All pods in the Deployment will share the same PVC if you mount it.
+
+This is okay for stateless apps (web servers, APIs) where local storage is not critical.
+
+✅ StatefulSet
+
+PVCs are automatically created per pod using volumeClaimTemplates.
+
+Example: if your StatefulSet has 3 replicas, it creates 3 PVCs (mysql-data-mysql-0, mysql-data-mysql-1, mysql-data-mysql-2).
+
+Each pod always gets the same PVC (stable storage).
+
+Helpful for stateful apps (databases, Kafka, Zookeeper) because each pod has its own storage, and data won’t get mixed or lost if pods are restarted.
+
+Why it’s helpful?
+
+👉 For stateful workloads, automatic PVC creation ensures:
+
+Stable data per pod → mysql-0 always gets its own data, even after restart.
+
+No manual PVC management → Kubernetes creates them automatically.
+
+Safe scaling → when you scale StatefulSet up/down, PVCs remain, so no accidental data loss.
+
+✅ One-liner answer for interview:
+“In a Deployment, PVCs must be created manually and are usually shared, but in a StatefulSet, Kubernetes automatically creates a unique PVC per pod using volumeClaimTemplates. This is helpful for databases or stateful apps because it gives each pod its own persistent, stable storage.”
+
+
 👉 Interviewer often follows up with:
 
 “If StatefulSet already gives persistence, why do we need PersistentVolumes?”

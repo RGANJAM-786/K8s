@@ -145,3 +145,44 @@ Centralized traffic control: We could add new routes without changing DNS or clo
 
 ✅ Simple Interview Summary:
 “Ingress acts like a smart traffic router for Kubernetes. It saves cost, simplifies management, enables HTTPS, and gives us flexibility to handle multiple services through a single entry point.”
+
+
+
+🛒 Example: E-commerce Application with Ingress
+
+Imagine your e-commerce app has these microservices:
+
+Frontend service (website UI)
+
+Products service (list of items)
+
+Orders service (manage orders)
+
+Payments service (process payments)
+
+🔹 How Ingress Works Here
+
+👉 Instead of giving each service its own external IP, we put an Ingress in front, like a smart gatekeeper.
+
+When a user opens shop.com/ → Ingress sends traffic to the Frontend service.
+
+When a user goes to shop.com/products → Ingress redirects traffic to the Products service.
+
+When a user goes to shop.com/orders → Ingress routes traffic to the Orders service.
+
+When a user goes to shop.com/payments → Ingress forwards traffic to the Payments service.
+
+🔹 Why is this useful?
+
+The user always uses the same domain → shop.com.
+
+Ingress decides where the request goes, based on the path in the URL.
+
+If we also want different domains, we can do that too:
+
+orders.shop.com → Orders service
+
+payments.shop.com → Payments service
+
+✅ Simple Statement for Interview:
+“In our e-commerce app, we used Ingress as a single entry point. For example, if a customer visits shop.com/payments, Ingress automatically routes the request to the Payments service. If they go to shop.com/orders, it routes to the Orders service. This way, users see only one domain, but internally Ingress smartly directs traffic to the right microservice.”

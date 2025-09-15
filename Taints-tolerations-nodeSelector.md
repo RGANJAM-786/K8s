@@ -222,3 +222,90 @@ Q: If a Pod with NodeSelector stays in Pending state, what could be the reason?
 
 ✅ Answer:
 "Most likely, there’s no node that matches the label defined in NodeSelector. For example, if I wrote disk=ssd but no node has that label, the Pod won’t get scheduled. In such cases, I check node labels using kubectl get nodes --show-labels."
+
+
+
+🔹 Scenario 1: Preferred scheduling
+
+Q: You have 5 nodes, and 2 of them are labeled zone=us-east. You want Pods to prefer running in us-east, but if no nodes are free there, they should still run on other nodes. How will you configure this?
+
+✅ Answer:
+"I’ll use Preferred Node Affinity. In the Pod spec, under affinity.nodeAffinity.preferredDuringSchedulingIgnoredDuringExecution, I’ll add the rule key: zone, operator: In, values: [us-east].
+
+This means the scheduler will try to place Pods in us-east first, but if no nodes are available, it will still allow them to run on other nodes. This avoids Pods getting stuck in Pending."
+
+🔹 Scenario 2: Strict scheduling
+
+Q: Your database Pods must only run on nodes with SSD disks. All such nodes are labeled disk=ssd. How will you ensure this requirement is strictly enforced?
+
+✅ Answer:
+"I’ll use Required Node Affinity with requiredDuringSchedulingIgnoredDuringExecution. This means the Pod will only be scheduled on nodes with disk=ssd. If no SSD node is available, the Pod will stay in Pending. This ensures database Pods never run on slower disks."
+
+🔹 Scenario 3: Multi-zone high availability
+
+Q: You want your application Pods spread across zone=us-east and zone=us-west. How do you configure it?
+
+✅ Answer:
+"I can use Node Affinity with operator: In for both zones, like values: [us-east, us-west]. This way, Pods can run in either zone, ensuring high availability across multiple regions."
+
+🔹 Scenario 4: Troubleshooting
+
+Q: If a Pod with Node Affinity is stuck in Pending, what could be the possible reasons?
+
+✅ Answer:
+"There are two common reasons:
+
+Strict rules don’t match any node — e.g., Pod requires disk=ssd, but no node has that label.
+
+Conflicting rules — sometimes affinity/anti-affinity together create contradictions, making scheduling impossible.
+
+In such cases, I check node labels with kubectl get nodes --show-labels and review the Pod spec."
+
+👉 Key takeaway for interviews:
+
+NodeSelector = simple & strict matching.
+
+Node Affinity = more advanced, supports preferred vs required rules.
+
+Affinity gives flexibility for high availability, fault tolerance, and better scheduling control.
+
+
+
+🔹 Scenario 1: Avoiding single-node failure
+
+Q: You have a web application with 3 replicas. You want to ensure that all 3 replicas don’t get scheduled on the same node. How will you achieve this?
+
+✅ Answer:
+"I’ll use Pod Anti-Affinity with requiredDuringSchedulingIgnoredDuringExecution. I’ll configure it so that Pods with the same label, like app=web, are not scheduled together on the same node. This ensures each replica runs on a different node, increasing fault tolerance."
+
+🔹 Scenario 2: High availability across zones
+
+Q: Suppose you have two availability zones: us-east and us-west. You want your critical service replicas spread across both zones. How do you configure that?
+
+✅ Answer:
+"I can use Pod Anti-Affinity with topologyKey set to topology.kubernetes.io/zone. This forces the scheduler to place Pods in different zones, not just on different nodes. That way, even if one zone fails, the service is still available in the other."
+
+🔹 Scenario 3: Soft spreading
+
+Q: You have multiple replicas of a service. Ideally, you want them spread across nodes, but you don’t want Pods to get stuck in Pending if resources are limited. How will you handle this?
+
+✅ Answer:
+"I’ll use Preferred Pod Anti-Affinity instead of Required. This means the scheduler will try to spread Pods across different nodes, but if resources are limited, it will still allow multiple Pods on the same node. This gives a balance between availability and flexibility."
+
+🔹 Scenario 4: Troubleshooting Pending Pods
+
+Q: You applied Pod Anti-Affinity, but now Pods are stuck in Pending. What might have gone wrong?
+
+✅ Answer:
+"This usually happens when the rules are too strict. For example, if I said Pods must run on different nodes but the cluster only has 2 nodes, then the third Pod has nowhere to go. In such cases, I either relax the rules using Preferred Anti-Affinity or add more nodes."
+
+👉 Key points for interview:
+
+Pod Anti-Affinity prevents Pods with the same label from landing together.
+
+Can be applied at node level or zone level using topology keys.
+
+Use Required for strict rules and Preferred for flexible spreading.
+
+Helps with fault tolerance, HA, and reducing single point of failure.
+

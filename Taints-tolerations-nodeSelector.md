@@ -439,11 +439,22 @@ Means “I want my Pod to run on the same node (or topology like AZ/region) as a
 
 Useful when Pods need to be close together for low latency or fast communication.
 
+<img width="727" height="525" alt="image" src="https://github.com/user-attachments/assets/d0eecec2-5735-4e56-8edb-92d2b511ce2b" />
+
+
+<img width="817" height="695" alt="image" src="https://github.com/user-attachments/assets/928f65cc-3057-472a-8665-8deff4289a81" />
+
+
 👉 Pod Anti-Affinity:
 
 Means “I do not want my Pod to run on the same node as another Pod with specific labels.”
 
 Useful for high availability, spreading Pods across nodes or zones to avoid a single point of failure.
+
+
+<img width="735" height="697" alt="image" src="https://github.com/user-attachments/assets/6234585c-053c-492f-8b0c-82e7a06e8d41" />
+
+
 
 🔹 Real-World Use Cases
 

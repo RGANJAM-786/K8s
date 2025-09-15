@@ -224,6 +224,185 @@ Q: If a Pod with NodeSelector stays in Pending state, what could be the reason?
 "Most likely, there’s no node that matches the label defined in NodeSelector. For example, if I wrote disk=ssd but no node has that label, the Pod won’t get scheduled. In such cases, I check node labels using kubectl get nodes --show-labels."
 
 
+# Node Affinity
+
+✅ Answer:
+
+Node Affinity in Kubernetes is a way to control which nodes your Pods get scheduled on, based on labels. It’s like NodeSelector but more advanced and flexible.
+
+🔹 Difference from NodeSelector
+
+NodeSelector → very simple, just matches exact labels. Example: nodeSelector: { disk: ssd } → Pod runs only on nodes with disk=ssd.
+
+Node Affinity → more powerful, lets you use:
+
+Required rules (requiredDuringSchedulingIgnoredDuringExecution) → Pod must run on nodes with matching labels.
+
+Preferred rules (preferredDuringSchedulingIgnoredDuringExecution) → Pod should run on nodes with matching labels, but can still go elsewhere if no match is available.
+
+Flexibility → Node Affinity supports operators like In, NotIn, Exists, unlike NodeSelector which is strict equality only.
+
+🔹 Important things I observed
+
+Pods can stay Pending if required rules don’t match any node.
+
+Preferred rules are useful when I want Pods to “try” a certain node type but still run elsewhere if needed.
+
+Always check node labels to avoid mismatch
+
+kubectl get nodes --show-labels
+
+
+Node Affinity works well when combined with taints/tolerations.
+
+
+🔹 The Two Types of Node Affinity Rules
+
+requiredDuringSchedulingIgnoredDuringExecution (Hard Rule)
+
+preferredDuringSchedulingIgnoredDuringExecution (Soft Rule)
+
+
+
+1. RequiredDuringSchedulingIgnoredDuringExecution
+
+Means the Pod must be scheduled only on nodes matching the rule.
+
+If no node matches, the Pod stays Pending.
+
+Example:
+
+
+<img width="800" height="267" alt="image" src="https://github.com/user-attachments/assets/7a7a0613-d4ba-4ec3-88c7-19d7427ad80d" />
+
+
+
+👉 Pod will only run on nodes labeled hardware=gpu.
+
+
+
+Another example 
+
+<img width="978" height="610" alt="image" src="https://github.com/user-attachments/assets/78c8daf6-a235-4cd6-9d15-854fad46d35f" />
+
+
+
+Real-world use case:
+
+In my project, we had GPU nodes for ML workloads.
+
+We labeled GPU nodes with hardware=gpu.
+
+ML training Pods had a required Node Affinity rule, so they only landed on GPU nodes.
+
+Issue faced: Sometimes the GPU nodes were already full (no free resources).
+
+Result → ML Pods stayed in Pending state.
+
+Troubleshooting:
+
+Checked Pod status:
+
+kubectl describe pod <pod-name>
+
+
+→ Saw 0/5 nodes are available: insufficient gpu.
+
+Fixed it by either adding more GPU nodes or adjusting resource requests to match available GPUs.
+
+2. PreferredDuringSchedulingIgnoredDuringExecution
+
+Means the Pod should try to schedule on matching nodes, but if not available, it can still go to another node.
+
+This gives flexibility.
+
+Example:
+
+
+<img width="796" height="292" alt="image" src="https://github.com/user-attachments/assets/2c02356f-6d87-4ce6-921b-ba9dfa9ae5e4" />
+
+
+👉 Pod will prefer SSD nodes, but if none available, it can still run on HDD nodes.
+
+
+
+another example:
+
+<img width="738" height="662" alt="image" src="https://github.com/user-attachments/assets/63ed4b9b-a24c-4589-867a-e773feca8f07" />
+
+
+
+Real-world use case:
+
+In my project, we had a logging service that performs better on SSD storage.
+
+We set a preferred rule for nodes labeled disk=ssd.
+
+This way, logging Pods usually went to SSD nodes, but in case all SSD nodes were busy, they could still run on HDD nodes.
+
+Issue faced: Sometimes Pods landed on HDD nodes, and performance dropped.
+
+Developers raised complaints that logs were slow.
+
+Troubleshooting:
+
+Verified by checking node placement:
+
+kubectl get pod -o wide
+
+Confirmed Pods were on HDD nodes.
+
+Solution: We increased weight of the preferred rule and added resource requests for higher IOPS to push scheduler towards SSD nodes.
+
+🔑 Key Learning from Real Use Cases:
+
+Required rules are strict → great for workloads that must run on special hardware (GPU, high-memory). But Pods may get stuck in Pending.
+
+Preferred rules are flexible → great for performance optimization, but not guaranteed. Sometimes Pods may land on less-performant nodes.
+
+Always combine Node Affinity with proper node labeling, Pod resource requests, and Cluster Autoscaler (so new nodes spin up if needed).
+
+👉 In short,
+
+Required = strict guarantee, risk of Pending
+
+Preferred = flexibility, risk of performance trade-offs
+
+
+# "In my projects, I mostly used the following Kubernetes Pod Scheduling techniques:
+
+Resource Requests & Limits –
+I always define CPU and memory requests so that the scheduler knows where to place the pod. This avoids resource contention and ensures that critical apps always get enough resources.
+
+NodeSelector (basic scheduling) –
+I used this for simple use cases, like running logging agents only on worker nodes with a specific label, e.g., node-role=infra.
+
+Node Affinity / Anti-Affinity (advanced scheduling) –
+I used this when I needed more flexibility.
+
+Example: Ensuring DB pods always run on SSD-backed nodes (nodeAffinity).
+
+Example: Making sure two replicas of the same app don’t land on the same node (podAntiAffinity).
+
+Taints & Tolerations –
+I used taints to isolate workloads. For example, I tainted GPU nodes so only GPU workloads (with tolerations) could be scheduled there. This helped prevent accidental scheduling of normal apps on expensive GPU nodes.
+
+PodDisruptionBudgets (PDBs) –
+While not directly a scheduling tool, I used PDBs to control how many pods can be taken down during node maintenance or upgrades, ensuring high availability.
+
+✨ Why these techniques?
+Because in real-world projects, these cover 95% of scheduling needs. The default scheduler is smart enough when combined with:
+
+Resource requests
+
+Affinity rules
+
+Taints/tolerations
+
+I didn’t need to write a custom scheduler, since these built-in techniques were sufficient to achieve reliability, cost efficiency, and workload separation."
+
+
+# Node Affinity Scenario based IQ:  
 
 🔹 Scenario 1: Preferred scheduling
 
@@ -270,6 +449,98 @@ Node Affinity = more advanced, supports preferred vs required rules.
 Affinity gives flexibility for high availability, fault tolerance, and better scheduling control.
 
 
+# ❓ Interview Question
+
+"Let’s say you configure soft Node Affinity for region=ap-south-1 and zone=ap-south-1b. You have two nodes:
+
+ip-192-168-17-235.ap-south-1.compute.internal → labeled with region=ap-south-1 and zone=ap-south-1c
+
+ip-192-168-59-88.ap-south-1.compute.internal → initially labeled with region=ap-south-1 and zone=ap-south-1a
+
+Now, you remove the labels from the second node using:
+
+kubectl label nodes ip-192-168-59-88.ap-south-1.compute.internal region- zone-
+
+
+If you now create a Pod with this soft Node Affinity, on which node will the Pod be scheduled, and why?"
+
+✅ Interview-Style Answer
+
+“Since Node Affinity is configured as soft (preferred), the scheduler will try to place the Pod on a node with region=ap-south-1 and zone=ap-south-1b. But none of the nodes have ap-south-1b.
+
+The first node (ap-south-1c) still has the region=ap-south-1 label, so it satisfies the required region condition.
+
+The second node no longer has any region or zone labels after we removed them, so it doesn’t match at all.
+
+Therefore, the Pod will be scheduled on the first node (ap-south-1c) because it at least meets the required region, even though the preferred zone is missing.
+
+This demonstrates that with preferred rules, Kubernetes will always try to honor the preference, but if no node matches, it falls back to any available eligible node.”
+
+
+
+# 🔹 Scenario-Based Interview Questions on Node Affinity
+
+Q1.
+
+👉 You configured requiredDuringSchedulingIgnoredDuringExecution with zone=ap-south-1b, but no node has that label. What happens?
+✅ Answer: The Pod will stay in Pending because hard rules must be satisfied, and no node matches.
+
+Q2.
+
+👉 You want your Pods to always run in region=ap-south-1, but prefer zone=ap-south-1b if available. How will you configure this?
+✅ Answer: Use requiredDuringSchedulingIgnoredDuringExecution for the region (hard rule) and preferredDuringSchedulingIgnoredDuringExecution for the zone (soft rule). That way, Pods will still run even if ap-south-1b is not available.
+
+Q3.
+
+👉 What’s the difference between hard and soft rules in Node Affinity?
+✅ Answer:
+
+Hard rule (required) → Pod will not run if no node matches.
+
+Soft rule (preferred) → Pod will try to run on matching nodes, but if none are available, it will fall back to other nodes.
+
+Q4.
+
+👉 If you set only preferredDuringSchedulingIgnoredDuringExecution with a zone that doesn’t exist, where will the Pod be scheduled?
+✅ Answer: The Pod will still get scheduled on any available node, because preferred rules are not mandatory.
+
+Q5.
+
+👉 In your project, when would you use preferred vs required Node Affinity?
+✅ Answer:
+
+I use required rules when Pods must run in specific regions for compliance or latency-sensitive apps.
+
+I use preferred rules when I want high availability, so Pods still run even if the exact zone is not available.
+
+
+
+# Scenario-Based Interview Questions on Scheduling
+
+Q1. You have GPU nodes in your cluster, but your normal applications are also getting scheduled there, consuming expensive resources. How will you restrict normal apps from running on GPU nodes?
+👉 Answer: I would add a taint on GPU nodes (e.g., kubectl taint nodes node1 gpu=true:NoSchedule) so that only pods with a matching toleration can run there. This ensures only GPU workloads use GPU nodes.
+
+Q2. You want your logging agent pods (like Fluentd) to always run only on worker nodes, not on master nodes. How would you achieve this?
+👉 Answer: I’d label the worker nodes (e.g., node-role=worker) and use nodeSelector or nodeAffinity in the logging DaemonSet so that the pods only run on labeled worker nodes.
+
+Q3. You have two replicas of a critical application. During a node failure, both replicas ended up on the same node, causing downtime. How do you avoid this?
+👉 Answer: I would configure podAntiAffinity so that Kubernetes scheduler places replicas on different nodes. For example, preferredDuringSchedulingIgnoredDuringExecution ensures the pods spread out, increasing high availability.
+
+Q4. You want your database pods to always run on nodes with SSD storage, not on HDD nodes. How do you enforce this?
+👉 Answer: I would label SSD nodes (e.g., disk=ssd) and use nodeAffinity in the database deployment spec so that DB pods only run on SSD-backed nodes.
+
+Q5. During a deployment rollout, the cluster autoscaler scaled down some nodes, and multiple pods were evicted at the same time, causing downtime. How do you prevent this?
+👉 Answer: I’d use a PodDisruptionBudget (PDB) to define the minimum number of pods that must stay available during voluntary disruptions like node scaling or upgrades.
+
+Q6. You have a multi-tenant cluster. Some workloads are low priority (e.g., dev/test), and some are high priority (e.g., production). How do you make sure production pods are scheduled first during resource shortages?
+👉 Answer: I would use Pod Priority & Preemption policies. Production pods get higher priority so if there’s a shortage, low-priority pods get evicted first.
+
+Q7. A pod is scheduled on a node, but later that node doesn’t meet your required conditions anymore (e.g., label changed). What happens?
+👉 Answer: Kubernetes doesn’t reschedule automatically in this case. Node affinity is only checked at scheduling time, not continuously. If conditions change later, the pod will keep running unless manually rescheduled.
+
+
+
+# Anti-Affinity Scenario based IQ
 
 🔹 Scenario 1: Avoiding single-node failure
 

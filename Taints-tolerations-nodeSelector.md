@@ -316,38 +316,6 @@ Required = strict guarantee, risk of Pending
 Preferred = flexibility, risk of performance trade-offs
 
 
-# "In my projects, I mostly used the following Kubernetes Pod Scheduling techniques:
-
-Resource Requests & Limits –
-I always define CPU and memory requests so that the scheduler knows where to place the pod. This avoids resource contention and ensures that critical apps always get enough resources.
-
-NodeSelector (basic scheduling) –
-I used this for simple use cases, like running logging agents only on worker nodes with a specific label, e.g., node-role=infra.
-
-Node Affinity / Anti-Affinity (advanced scheduling) –
-I used this when I needed more flexibility.
-
-Example: Ensuring DB pods always run on SSD-backed nodes (nodeAffinity).
-
-Example: Making sure two replicas of the same app don’t land on the same node (podAntiAffinity).
-
-Taints & Tolerations –
-I used taints to isolate workloads. For example, I tainted GPU nodes so only GPU workloads (with tolerations) could be scheduled there. This helped prevent accidental scheduling of normal apps on expensive GPU nodes.
-
-PodDisruptionBudgets (PDBs) –
-While not directly a scheduling tool, I used PDBs to control how many pods can be taken down during node maintenance or upgrades, ensuring high availability.
-
-✨ Why these techniques?
-Because in real-world projects, these cover 95% of scheduling needs. The default scheduler is smart enough when combined with:
-
-Resource requests
-
-Affinity rules
-
-Taints/tolerations
-
-I didn’t need to write a custom scheduler, since these built-in techniques were sufficient to achieve reliability, cost efficiency, and workload separation."
-
 
 # Node Affinity Scenario based IQ:  
 
@@ -774,3 +742,37 @@ Q6. You have a multi-tenant cluster. Some workloads are low priority (e.g., dev/
 Q7. A pod is scheduled on a node, but later that node doesn’t meet your required conditions anymore (e.g., label changed). What happens?
 
 👉 Answer: Kubernetes doesn’t reschedule automatically in this case. Node affinity is only checked at scheduling time, not continuously. If conditions change later, the pod will keep running unless manually rescheduled.
+
+
+# "In my projects, I mostly used the following Kubernetes Pod Scheduling techniques:
+
+Resource Requests & Limits –
+I always define CPU and memory requests so that the scheduler knows where to place the pod. This avoids resource contention and ensures that critical apps always get enough resources.
+
+NodeSelector (basic scheduling) –
+I used this for simple use cases, like running logging agents only on worker nodes with a specific label, e.g., node-role=infra.
+
+Node Affinity / Anti-Affinity (advanced scheduling) –
+I used this when I needed more flexibility.
+
+Example: Ensuring DB pods always run on SSD-backed nodes (nodeAffinity).
+
+Example: Making sure two replicas of the same app don’t land on the same node (podAntiAffinity).
+
+Taints & Tolerations –
+I used taints to isolate workloads. For example, I tainted GPU nodes so only GPU workloads (with tolerations) could be scheduled there. This helped prevent accidental scheduling of normal apps on expensive GPU nodes.
+
+PodDisruptionBudgets (PDBs) –
+While not directly a scheduling tool, I used PDBs to control how many pods can be taken down during node maintenance or upgrades, ensuring high availability.
+
+✨ Why these techniques?
+Because in real-world projects, these cover 95% of scheduling needs. The default scheduler is smart enough when combined with:
+
+Resource requests
+
+Affinity rules
+
+Taints/tolerations
+
+I didn’t need to write a custom scheduler, since these built-in techniques were sufficient to achieve reliability, cost efficiency, and workload separation."
+

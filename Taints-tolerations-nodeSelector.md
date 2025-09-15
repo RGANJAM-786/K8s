@@ -193,3 +193,32 @@ Q6: What happens if a Pod has toleration but no nodeSelector/affinity, and there
 But if I want to make sure it always lands on the tainted node, I need to add a nodeSelector or affinity."
 
 
+👍 Let’s create scenario-based interview questions (IQ) for NodeSelector along with easy-to-understand answers:
+
+🔹 Scenario 1: Basic scheduling
+
+Q: You have 3 nodes in your cluster: two are normal nodes and one is labeled as disk=ssd. Your workload requires high-speed disk. How will you make sure Pods are scheduled only on the SSD node?
+
+✅ Answer:
+"I’ll use NodeSelector in my Pod/Deployment YAML. By adding nodeSelector: { disk: ssd }, the scheduler will only place Pods on nodes with that label. This ensures my workload always runs on the SSD-backed node."
+
+🔹 Scenario 2: Preventing unwanted scheduling
+
+Q: Let’s say you have a node labeled type=testing, but you don’t want production workloads to run there. How do you make sure?
+
+✅ Answer:
+"I won’t add the nodeSelector label for production workloads. Since production Pods don’t match the type=testing label, they’ll never be scheduled there. NodeSelector works as a strict filter — only nodes with matching labels are considered."
+
+🔹 Scenario 3: Multi-environment setup
+
+Q: Imagine your cluster has two types of nodes — env=dev and env=prod. You have a Deployment for development workloads. How do you make sure it runs only on dev nodes?
+
+✅ Answer:
+"I’ll add nodeSelector: { env: dev } in the Deployment spec. That way, the dev workloads will always stay isolated on dev nodes, and prod workloads won’t interfere."
+
+🔹 Scenario 4: Troubleshooting
+
+Q: If a Pod with NodeSelector stays in Pending state, what could be the reason?
+
+✅ Answer:
+"Most likely, there’s no node that matches the label defined in NodeSelector. For example, if I wrote disk=ssd but no node has that label, the Pod won’t get scheduled. In such cases, I check node labels using kubectl get nodes --show-labels."

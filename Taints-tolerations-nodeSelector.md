@@ -155,6 +155,7 @@ OR add the correct toleration in the Pod spec.
 👉 This is a common issue with taints.
 
 ✅ Summary to use in Interview:
+
 Taints and tolerations let nodes restrict workloads, while NodeSelector lets Pods request nodes. In my projects, I used them for GPU workloads, dedicated nodes for sensitive services, and ensuring monitoring Pods always had resources.
 When troubleshooting Pending Pods, checking taints and tolerations is one of the first steps.
 
@@ -280,35 +281,11 @@ Example:
 👉 Pod will only run on nodes labeled hardware=gpu.
 
 
-
 Another example 
 
 <img width="978" height="610" alt="image" src="https://github.com/user-attachments/assets/78c8daf6-a235-4cd6-9d15-854fad46d35f" />
 
 
-
-Real-world use case:
-
-In my project, we had GPU nodes for ML workloads.
-
-We labeled GPU nodes with hardware=gpu.
-
-ML training Pods had a required Node Affinity rule, so they only landed on GPU nodes.
-
-Issue faced: Sometimes the GPU nodes were already full (no free resources).
-
-Result → ML Pods stayed in Pending state.
-
-Troubleshooting:
-
-Checked Pod status:
-
-kubectl describe pod <pod-name>
-
-
-→ Saw 0/5 nodes are available: insufficient gpu.
-
-Fixed it by either adding more GPU nodes or adjusting resource requests to match available GPUs.
 
 2. PreferredDuringSchedulingIgnoredDuringExecution
 
@@ -331,36 +308,6 @@ another example:
 <img width="738" height="662" alt="image" src="https://github.com/user-attachments/assets/63ed4b9b-a24c-4589-867a-e773feca8f07" />
 
 
-
-Real-world use case:
-
-In my project, we had a logging service that performs better on SSD storage.
-
-We set a preferred rule for nodes labeled disk=ssd.
-
-This way, logging Pods usually went to SSD nodes, but in case all SSD nodes were busy, they could still run on HDD nodes.
-
-Issue faced: Sometimes Pods landed on HDD nodes, and performance dropped.
-
-Developers raised complaints that logs were slow.
-
-Troubleshooting:
-
-Verified by checking node placement:
-
-kubectl get pod -o wide
-
-Confirmed Pods were on HDD nodes.
-
-Solution: We increased weight of the preferred rule and added resource requests for higher IOPS to push scheduler towards SSD nodes.
-
-🔑 Key Learning from Real Use Cases:
-
-Required rules are strict → great for workloads that must run on special hardware (GPU, high-memory). But Pods may get stuck in Pending.
-
-Preferred rules are flexible → great for performance optimization, but not guaranteed. Sometimes Pods may land on less-performant nodes.
-
-Always combine Node Affinity with proper node labeling, Pod resource requests, and Cluster Autoscaler (so new nodes spin up if needed).
 
 👉 In short,
 

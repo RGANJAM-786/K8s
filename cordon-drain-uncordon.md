@@ -20,6 +20,87 @@ kubectl drain <node> → Evicts all pods from the node safely.
 → Typically used before node maintenance (upgrade, scale down).
 → Respects PodDisruptionBudgets (PDBs), DaemonSets, and respects replication.
 
+
+
+# ⚙️ What Happens When You Run kubectl drain
+
+Example:
+
+kubectl drain node1 --ignore-daemonsets --delete-emptydir-data
+
+
+* Node is cordoned
+
+Kubernetes marks node1 as unschedulable (kubectl cordon).
+
+No new pods will be scheduled on this node.
+
+* Eviction API tries to evict pods
+
+All pods (except DaemonSet pods and static pods) are sent an Eviction request.
+
+If a PodDisruptionBudget (PDB) exists, the eviction will only proceed if the budget is not violated.
+
+Pods get terminated
+
+* Kubernetes starts terminating pods on node1.
+
+Each pod has a controller (Deployment, ReplicaSet, StatefulSet, DaemonSet, etc.).
+
+* Controllers recreate pods on healthy nodes
+
+When a pod is evicted, its controller notices that the desired number of replicas dropped.
+
+It creates a new pod on another available node.
+
+The Kubernetes scheduler decides where to place this new pod, based on:
+
+Node resources (CPU, memory)
+
+Node taints/tolerations
+
+Node affinity/anti-affinity rules
+
+PDB constraints
+
+Scheduling policies
+
+Traffic shifts automatically
+
+If pods are fronted by a Service, kube-proxy and endpoints update to point to the new pods automatically.
+
+End users don’t need to know pods moved; traffic just flows to the healthy pods.
+
+🔄 Example Flow
+
+You have a Deployment with 3 replicas (pods spread across nodes).
+
+node1 has 1 replica.
+
+You drain node1.
+
+➡️ That pod is terminated.
+➡️ Deployment controller creates a new replica on another available node (node2 or node3).
+➡️ Scheduler decides placement → pod runs on the new node.
+
+
+# 🛠️ Real-Life Case
+
+When I upgraded EKS node groups:
+
+AWS created a new node with the upgraded AMI.
+
+The old node was drained → pods moved to the new node.
+
+Because of PDB, not all pods moved at once → services stayed online.
+
+
+✅ Summary for interviews
+
+"When a node is drained, Kubernetes first cordons the node, then evicts pods. The controllers (like Deployments or StatefulSets) detect that a pod is missing and create new ones. The scheduler places those new pods on other available nodes based on resources and constraints. If a Pod Disruption Budget is set, it ensures that not too many pods are evicted at the same time. This way, workloads are seamlessly rescheduled onto other nodes without user disruption."
+
+
+
 # 🔹 When I used these in projects (Real Scenarios)
 
 # 1. Node Maintenance / Upgrade

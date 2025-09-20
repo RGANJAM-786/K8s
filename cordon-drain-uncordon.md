@@ -306,6 +306,9 @@ So, PDB protects availability during maintenance.
 "In my projects, I used Pod Disruption Budgets (PDBs) mainly during EKS node upgrades and node draining for maintenance. For critical microservices, I defined minAvailable or maxUnavailable to ensure high availability. For StatefulSets like Kafka and ElasticSearch, PDBs were essential to maintain quorum. This helped avoid downtime and ensured smooth rolling upgrades during voluntary disruptions."
 
 
+<img width="927" height="688" alt="image" src="https://github.com/user-attachments/assets/05cce1be-f728-4b18-805c-7721f942d0de" />
+
+
 # Scenario 1: Routine node maintenance
 
 ✅Question: What is the first command you would run to begin the maintenance on node-1? Explain what this command does.

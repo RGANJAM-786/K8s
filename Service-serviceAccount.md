@@ -1,4 +1,4 @@
-🔹 Service Object in Kubernetes
+# 🔹 Service Object in Kubernetes
 
 A Service is an abstraction in Kubernetes that provides stable networking for Pods.
 
@@ -6,7 +6,9 @@ Since Pods are ephemeral (they can die and restart with new IPs), a Service ensu
 
 Services can also load balance traffic across multiple Pods of the same application.
 
+
 👉 Types of Services:
+
 
 ClusterIP – Default. Exposes the Service inside the cluster only.
 
@@ -16,7 +18,9 @@ LoadBalancer – Integrates with Cloud Provider’s load balancer (e.g., AWS ELB
 
 Headless Service – Doesn’t do load balancing, used often with StatefulSets to talk to Pods directly.
 
+
 ⚡ How I used in project:
+
 
 For our microservices-based application, we used ClusterIP to enable communication between services internally.
 
@@ -24,7 +28,9 @@ For external traffic, we exposed critical apps using LoadBalancer Service behind
 
 For our database StatefulSet, we used a Headless Service to make each replica discoverable individually.
 
-🔹 Service Account in Kubernetes
+
+# 🔹 Service Account in Kubernetes
+
 
 A Service Account (SA) is an identity used by Pods to interact with the Kubernetes API.
 
@@ -66,18 +72,22 @@ For example, in my project, I used Services to expose my microservices and datab
 
 
 Q1. You deployed a web application with 3 replicas. Each Pod has a different IP. How will users consistently access the app without worrying about Pod IP changes?
+
 👉 Answer:
 “In Kubernetes, Pod IPs keep changing if Pods restart. To solve this, we use a Service. A Service gives a fixed DNS name and virtual IP that stays the same, no matter how many times Pods restart. The Service automatically routes traffic to the right Pod. So users don’t need to worry about Pod IPs.”
 
 Q2. You deployed a database as a Pod, and multiple applications need to access it within the cluster. How will you make sure all apps can connect reliably?
+
 👉 Answer:
 “I’ll create a ClusterIP Service for the database. That way, all applications can connect using a single stable DNS name, like mysql-service.default.svc.cluster.local. Even if the DB Pod restarts with a new IP, the Service always routes to it.”
 
 Q3. Your service should be accessible from the internet, but only for specific ports. How would you configure it?
+
 👉 Answer:
 “I’ll use either a NodePort or a LoadBalancer Service. With NodePort, the service is exposed on each Node’s IP at a static port. With LoadBalancer, a cloud provider creates an external load balancer. I can also restrict ports or firewall rules so that only required ports are open.”
 
 Q4. You want traffic to be distributed evenly across all Pods of your backend service. How would Kubernetes achieve this?
+
 👉 Answer:
 “Kubernetes Service automatically does load balancing using kube-proxy. When requests come to the Service, they are evenly distributed across all healthy Pods behind it.”
 
@@ -86,18 +96,22 @@ Q4. You want traffic to be distributed evenly across all Pods of your backend se
 
 
 Q1. You have a Pod running a monitoring tool that needs to read metrics from the Kubernetes API. How will you give it access without exposing full cluster-admin rights?
+
 👉 Answer:
 “I’ll create a Service Account for the monitoring Pod, then assign it a Role/RoleBinding with only read permissions on metrics resources. That way, it has just enough access, not full admin rights.”
 
 Q2. Your Dev team wants to deploy apps but should not be able to delete Pods. How would you configure this using Service Accounts?
+
 👉 Answer:
 “I’ll create a Role that allows get, list, and create Pods, but not delete. Then I’ll bind this Role to the Dev team’s Service Account. This ensures they can deploy apps but cannot delete running Pods.”
 
 Q3. You integrated Jenkins with Kubernetes to deploy apps. Jenkins needs to run kubectl commands inside the cluster. How will you give Jenkins secure access?
+
 👉 Answer:
 “I’ll create a dedicated Service Account for Jenkins, and attach only required RBAC rules (like managing Deployments and Services). Jenkins will use this Service Account’s token to authenticate with the Kubernetes API securely.”
 
 Q4. You want to audit which Pods are making API requests. How can Service Accounts help here?
+
 👉 Answer:
 “Each Pod in Kubernetes runs with a Service Account token. Whenever that Pod talks to the API server, the API server logs show which Service Account made the request. This way, we can easily audit and track actions.”
 
